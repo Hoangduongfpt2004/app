@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#E8EBEF</color>
+    <color name="blue">#2196F3</color> <!-- hoặc màu xanh bạn muốn -->
+    <color name="primary_color">#2196F3</color>
+    <color name="blue_dark">#0B4C7A</color>
+    <color name="colorPrimary">#0075C0</color>
+    <color name="colorPrimaryDark">#005999</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="textPrimary">#212121</color>
+    <color name="textSecondary">#757575</color>
+    <color name="blue_primary_pop">#0079C1</color>
+
+
+
+
+
+
+
+</resources>

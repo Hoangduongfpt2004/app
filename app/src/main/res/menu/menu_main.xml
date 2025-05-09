@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+        <item
+            android:id="@+id/ban_hang"
+            android:title="Bán Hàng"
+            android:icon="@drawable/logo_ban_hang"
+            />
+        <item
+            android:id="@+id/thuc_don"
+            android:title="Thực Đơn"
+            android:icon="@drawable/ic_thuc_don"/>
+        <item
+            android:id="@+id/bao_cao"
+            android:title="Báo Cáo"
+            android:icon="@drawable/ic_bao_cao"/>
+    <!-- Nhóm 1: THIẾT LẬP -->
+    <item
+        android:id="@+id/menu_Thiet_Lap"
+        android:title="THIẾT LẬP">
+        <menu>
+            <item
+                android:id="@+id/dong_bo_du_lieu"
+                android:icon="@android:drawable/stat_sys_download"
+                android:title="Đồng bộ dữ liệu" />
+            <item
+                android:id="@+id/thiet_lap"
+                android:icon="@android:drawable/ic_menu_manage"
+                android:title="Thiết lập" />
+            <item
+                android:id="@+id/lien_ket_tai_khoan"
+                android:icon="@android:drawable/ic_menu_share"
+                android:title="Liên kết tài khoản" />
+
+        </menu>
+    </item>
+    <!-- Nhóm 2: TRỢ GIÚP -->
+    <item
+        android:id="@+id/menu_tro_giup"
+        android:title="TRỢ GIÚP">
+        <menu>
+            <item
+                android:id="@+id/thong_bao"
+                android:icon="@android:drawable/ic_dialog_info"
+                android:title="Thông báo" />
+            <item
+                android:id="@+id/gioi_thieu"
+                android:icon="@android:drawable/ic_menu_send"
+                android:title="Giới thiệu cho bạn" />
+            <item
+                android:id="@+id/danh_gia_ung_dung"
+                android:icon="@android:drawable/star_big_on"
+                android:title="Đánh giá ứng dụng" />
+            <item
+                android:id="@+id/gop_y"
+                android:icon="@android:drawable/ic_menu_edit"
+                android:title="Góp ý với nhà phát triển" />
+            <item
+                android:id="@+id/thong_tin_san_pham"
+                android:icon="@android:drawable/ic_menu_info_details"
+                android:title="Thông tin sản phẩm" />
+        </menu>
+
+    </item>
+
+
+
+    <!-- Nhóm 4: TÀI KHOẢN -->
+    <item
+        android:id="@+id/menu_tai_khoan"
+        android:title="Tài Khoản">
+        <menu>
+            <item
+                android:id="@+id/dat_mat_khau"
+                android:icon="@android:drawable/ic_lock_lock"
+                android:title="Đặt mật khẩu" />
+            <item
+                android:id="@+id/dang_xuat"
+                android:icon="@android:drawable/ic_lock_power_off"
+                android:title="Đăng xuất" />
+
+
+        </menu>
+
+
+    </item>
+
+
+
+
+</menu>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_register"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    tools:context=".register.view.RegisterActivity">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#0B85D7"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:title="Đăng ký"
+        app:titleCentered="true"
+        app:titleTextColor="@android:color/white"
+        android:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+
+    <!-- Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/edtPhoneOrEmail"
+            style="@style/EditText.Email"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:hint="Số điện thoại hoặc email"
+            android:inputType="textEmailAddress"
+            tools:ignore="HardcodedText,TextFields" />
+
+        <EditText
+            android:id="@+id/edtPassword"
+            android:hint="Mật khẩu"
+            android:inputType="textPassword"
+            android:background="@android:drawable/edit_text"
+            style="@style/EditText.Password"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btnRegister"
+            android:text="ĐĂNG KÝ"
+            style="@style/Button.Register"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/txtAgreement"
+            android:text="Khi bấm nút Đăng ký đồng nghĩa với việc bạn đã đọc, hiểu và đồng ý với thoả thuận sử dụng dịch vụ CUKCUK.VN"
+            android:textAlignment="center"
+            style="@style/App_Text.Agreement"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
+</LinearLayout>

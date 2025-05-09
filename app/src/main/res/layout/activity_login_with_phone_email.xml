@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@color/blue"
+    android:padding="24dp"
+    tools:context=".LoginPhoneandEmail.view.LoginWithPhoneEmailActivity">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:src="@drawable/im4"
+        style="@style/Image.IconLoGo"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CUKCUK LITE"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp" />
+
+    <!-- Form -->
+    <LinearLayout
+        android:id="@+id/formContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginTop="32dp"
+        android:clipToPadding="false">
+
+        <!-- Email/Phone -->
+        <EditText
+            android:id="@+id/editEmail"
+            android:hint="Số điện thoại hoặc email"
+            android:drawableStart="@drawable/ic_user"
+            android:background="@android:color/white"
+            android:textColor="@android:color/black"
+            android:inputType="textEmailAddress"
+            style="@style/EditText.Login"/>
+
+        <!-- Password -->
+        <EditText
+            android:id="@+id/editPassword"
+            android:hint="Mật khẩu"
+            android:drawableStart="@drawable/ic_lock"
+            android:inputType="textPassword"
+            style="@style/EditText.pass"/>
+
+    </LinearLayout>
+
+    <!-- Button -->
+    <Button
+        android:id="@+id/buttonLogin"
+        android:text="ĐĂNG NHẬP"
+        android:textAllCaps="true"
+        style="@style/Button.Login"/>
+
+    <!-- Quên mật khẩu -->
+    <TextView
+        android:id="@+id/txtQuenMatKhau"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quên mật khẩu?"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
+
+</LinearLayout>
