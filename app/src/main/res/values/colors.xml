@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Màu đã có -->
     <color name="black">#FF000000</color>
     <color name="white">#E8EBEF</color>
-    <color name="blue">#2196F3</color> <!-- hoặc màu xanh bạn muốn -->
+    <color name="blue">#2196F3</color>
     <color name="primary_color">#2196F3</color>
     <color name="blue_dark">#0B4C7A</color>
     <color name="colorPrimary">#0075C0</color>
@@ -12,10 +13,36 @@
     <color name="textSecondary">#757575</color>
     <color name="blue_primary_pop">#0079C1</color>
 
-
-
-
-
-
-
+    <!-- Màu thêm mới (không trùng tên cũ) -->
+    <color name="red_base">#F44336</color>
+    <color name="pink_base">#E91E63</color>
+    <color name="purple_base">#9C27B0</color>
+    <color name="deep_purple_base">#673AB7</color>
+    <color name="indigo_base">#3F51B5</color>
+    <color name="light_blue_base">#03A9F4</color>
+    <color name="cyan_base">#00BCD4</color>
+    <color name="teal_base">#009688</color>
+    <color name="green_base">#4CAF50</color>
+    <color name="light_green_base">#8BC34A</color>
+    <color name="lime_base">#CDDC39</color>
+    <color name="yellow_base">#FFEB3B</color>
+    <color name="amber_base">#FFC107</color>
+    <color name="orange_base">#FF9800</color>
+    <color name="deep_orange_base">#FF5722</color>
+    <color name="brown_base">#795548</color>
+    <color name="grey_base">#9E9E9E</color>
+    <color name="blue_grey_base">#607D8B</color>
+    <color name="light_grey_base">#D3D3D3</color>
+    <color name="dark_grey_base">#424242</color>
+    <color name="navy_base">#000080</color>
+    <color name="olive_base">#808000</color>
+    <color name="maroon_base">#800000</color>
+    <color name="aqua_base">#00FFFF</color>
+    <color name="fuchsia_base">#FF00FF</color>
+    <color name="silver_base">#C0C0C0</color>
+    <color name="gold_base">#FFD700</color>
+    <color name="sky_blue_base">#87CEEB</color>
+    <color name="beige_base">#F5F5DC</color>
+    <color name="mint_base">#98FF98</color>
+    <color name="peach_base">#FFDAB9</color>
 </resources>
