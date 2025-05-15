@@ -6,8 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.appquanly.banhang.view.BanHangActivity
-import com.example.appquanly.login.view.LoginActivity
+import com.example.appquanly.Sale.BanHangActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

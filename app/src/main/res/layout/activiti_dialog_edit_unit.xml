@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <!-- Tiêu đề với nút đóng -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2196F3"
+        android:padding="8dp">
+
+        <TextView
+            android:text="Sửa đơn vị tính"
+            style="@style/Sua_Don_Vi_Tinh"/>
+
+        <ImageView
+            android:id="@+id/btnClose"
+            android:contentDescription="Đóng"
+            android:src="@drawable/ic_close_white"
+            style="@style/Base_Cloes"/>
+    </RelativeLayout>
+
+    <!-- EditText để nhập tên đơn vị tính -->
+    <EditText
+        android:id="@+id/edtUnitName"
+        android:hint="Nhập tên đơn vị tính"
+        android:background="@android:drawable/editbox_background"
+        style="@style/edtUnitName"/>
+
+    <!-- Hai nút HỦY BỎ và CẤT lệch sang phải -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="end">  <!-- Lệch sang bên phải -->
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCancel"
+            android:text="HỦY BỎ"
+            style="@style/btnCancel"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSave"
+            android:text="CẤT"
+            style="@style/btnSave_one"/>
+    </LinearLayout>
+
+</LinearLayout>

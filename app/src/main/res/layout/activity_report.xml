@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Report.Bao_CaoActivity">
+
+    <!-- Toolbar -->
+
+    <!-- Thanh chọn thời gian -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarRevenue"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/blue"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="Doanh Thu"
+        app:titleCentered="true"
+        app:titleTextColor="@color/white" />
+
+
+    <LinearLayout
+        android:id="@+id/timeFilterLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:orientation="horizontal"
+        android:background="@android:color/darker_gray"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txtTimeLabel"
+            android:text="Thời gian"
+            style="@style/App_txtTimeLabel"/>
+
+        <TextView
+            android:id="@+id/txtTimeFilter"
+            android:text="Gần đây"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:drawablePadding="4dp"
+            style="@style/App_txtTimeFilter"/>
+    </LinearLayout>
+
+    <!-- Danh sách các nút lọc thời gian theo chiều dọc với icon -->
+    <LinearLayout
+        android:id="@+id/timeOptionList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:padding="12dp">
+
+        <!-- Nút "Hôm qua" -->
+        <LinearLayout
+            android:id="@+id/btnHomQua"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:contentDescription="Hôm qua"
+                android:src="@drawable/img_yesterday"
+                style="@style/img_icon_day"/>
+            <TextView
+                android:text="Hôm qua"
+                style="@style/font_size"/>
+        </LinearLayout>
+
+        <!-- Separator -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- Nút "Hôm nay" -->
+        <LinearLayout
+            android:id="@+id/btnHomNay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:contentDescription="Hôm nay"
+                android:src="@drawable/icon_hom_nay"
+                style="@style/img_icon_day"/>
+            <TextView
+                android:text="Hôm nay"
+                style="@style/font_size"/>
+        </LinearLayout>
+
+        <!-- Separator -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- Nút "Tuần này" -->
+        <LinearLayout
+            android:id="@+id/btnTuanNay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:contentDescription="Tuần này"
+                android:src="@drawable/img_7day"
+                style="@style/img_icon_day"/>
+            <TextView
+                android:text="Tuần này"
+                style="@style/font_size"/>
+        </LinearLayout>
+
+        <!-- Separator -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- Nút "Tháng này" -->
+        <LinearLayout
+            android:id="@+id/btnThangNay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:contentDescription="Tháng này"
+                android:src="@drawable/img_30day"
+                style="@style/img_icon_day"/>
+            <TextView
+                android:text="Tháng này"
+                style="@style/font_size"/>
+        </LinearLayout>
+
+        <!-- Separator -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- Nút "Năm nay" -->
+        <LinearLayout
+            android:id="@+id/btnNamNay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackground">
+
+            <ImageView
+                android:contentDescription="Năm này"
+                android:src="@drawable/img_365day"
+                style="@style/img_icon_day"/>
+            <TextView
+                android:text="Năm nay"
+                style="@style/font_size"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
+    </LinearLayout>
+
+    <!-- Danh sách doanh thu -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerRevenue"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/white" />
+
+</LinearLayout>

@@ -6,47 +6,68 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logocuckcuk"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logocuckcuk"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppQuanLy"
         tools:targetApi="31">
         <activity
-            android:name=".Dang_Xuat.view.Dang_XuatActivity"
+            android:name=".SalePutIn.SaleeActivity"
             android:exported="false" />
         <activity
-            android:name=".Dat_Mat_Khau.view.Dat_Mat_KhauActivity"
+            android:name=".CashRegiter.CashRegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".Thong_Tin_San_Pham.view.Thong_Tin_San_PhamActivity"
+            android:name=".HoaDon.HoaDonActivity"
             android:exported="false" />
         <activity
-            android:name=".Gop_Y_Voi_Nha_Phat_Trien.view.Gop_Y_Voi_Nha_Phat_TrienActivity"
+            android:name=".ChooseDish.view.ChooseDishActivity"
             android:exported="false" />
         <activity
-            android:name=".Danh_Gia_Ung_Dung.view.Danh_Gia_Ung_DungActivity"
+            android:name=".UnitOfMeasure.DonViTinhActivity"
             android:exported="false" />
         <activity
-            android:name=".Gioi_Thieu_Cho_Ban_Hang.view.Gioi_Thieu_Cho_BanActivity"
+            android:name=".AddProduct.Them_San_PhamActivity"
             android:exported="false" />
         <activity
-            android:name=".Thong_Bao.view.Thong_BaoActivity"
+            android:name=".Establish.ThietLapActivity"
             android:exported="false" />
         <activity
-            android:name=".Lien_Ket_Tai_Khoan.view.Lien_Ket_Tai_KhoanActivity"
+            android:name=".Sunchroize.Dong_BoActivity"
             android:exported="false" />
         <activity
-            android:name=".Thiet_Lap.view.Thiet_LapActivity"
+            android:name=".fragment_sync_data"
             android:exported="false" />
         <activity
-            android:name=".Dong_Bo_Du_Lieu.view.Dong_Bo_Giu_LieuActivity"
+            android:name=".AddDish.ThemMonActivity"
             android:exported="false" />
         <activity
-            android:name=".Bao_Cao.view.Bao_CaoActivity"
+            android:name=".LogOut.Dang_XuatActivity"
             android:exported="false" />
         <activity
-            android:name=".ThucDon.view.ThucDonActivity"
+            android:name=".CreatePassWord.Dat_Mat_KhauActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProductInformation.Thong_Tin_San_PhamActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Comments.Gop_Y_Voi_Nha_Phat_TrienActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Evaluate.Danh_Gia_Ung_DungActivity"
+            android:exported="false" />
+        <activity
+            android:name=".IntroduceYourself.Gioi_Thieu_Cho_BanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Notification.Thong_BaoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LinkAccount.Lien_Ket_Tai_KhoanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Report.Bao_CaoActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
@@ -58,18 +79,18 @@
             </intent-filter>
         </activity> <!-- Login Activity -->
         <activity
-            android:name=".login.view.LoginActivity"
+            android:name=".login.LoginActivity"
             android:exported="true" /> <!-- Register Activity -->
         <activity
-            android:name=".register.view.RegisterActivity"
+            android:name=".register.RegisterActivity"
             android:exported="true" />
-        <activity android:name=".LoginPhoneandEmail.view.LoginWithPhoneEmailActivity" />
-        <activity android:name=".ForgotPassword.view.ForgotPasswordActivity" />
-        <activity android:name=".banhang.view.SelectDishActivity">
+        <activity android:name=".LoginPhoneandEmail.LoginWithPhoneEmailActivity" />
+        <activity android:name=".ForgotPassword.ForgotPasswordActivity" />
+        <activity android:name=".SelectDishActivity.SelectDishActivity">
 
             <!-- Các thông tin cấu hình khác của Activity nếu cần -->
         </activity>
-        <activity android:name=".banhang.view.BanHangActivity" />
+        <activity android:name=".Sale.BanHangActivity" />
     </application>
 
 </manifest>

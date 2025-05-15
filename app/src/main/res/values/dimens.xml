@@ -1,0 +1,8 @@
+<resources>
+    <!-- Kích thước của các icon trong dialog -->
+    <dimen name="icon_size">48dp</dimen> <!-- Thay đổi giá trị nếu cần -->
+
+    <!-- Kích thước của các màu trong color picker -->
+    <dimen name="color_circle_size">50dp</dimen>
+    <dimen name="color_circle_margin">8dp</dimen>
+</resources>

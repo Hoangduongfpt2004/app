@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal"
+    android:paddingHorizontal="16dp"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:id="@+id/iconCheck"
+        android:src="@drawable/ic_selected"
+        style="@style/Image_Check"/>
+
+    <TextView
+        android:id="@+id/txtName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="16sp" />
+
+    <ImageButton
+        android:id="@+id/iconEdit"
+        android:src="@drawable/ic_edit"
+        style="@style/Image_Edit"/>
+</LinearLayout>

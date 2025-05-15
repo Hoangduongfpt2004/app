@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#F5F5F5"
+    android:padding="12dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:text="Nhập"
+        style="@style/tvTitle_MayTinh"/>
+
+    <!-- Display -->
+    <EditText
+        android:id="@+id/edtDisplay"
+        android:text="0"
+        style="@style/edtDisplay"/>
+
+    <!-- Calculator buttons -->
+    <GridLayout
+        android:id="@+id/gridButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:alignmentMode="alignMargins"
+        android:columnCount="4"
+        android:rowCount="5"
+        android:columnOrderPreserved="false">
+
+        <!-- Row 0 -->
+        <androidx.appcompat.widget.AppCompatButton android:text="C" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="Giảm" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="Tăng" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="x" style="@style/CalculatorButton" />
+
+        <!-- Row 1 -->
+        <androidx.appcompat.widget.AppCompatButton android:text="7" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="8" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="9" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="-" style="@style/CalculatorButton" />
+
+        <!-- Row 2 -->
+        <androidx.appcompat.widget.AppCompatButton android:text="4" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="5" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="6" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="+" style="@style/CalculatorButton" />
+
+        <!-- Row 3 -->
+        <androidx.appcompat.widget.AppCompatButton android:text="1" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="2" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="3" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="/" style="@style/CalculatorButton" />
+
+        <!-- Row 4 -->
+        <androidx.appcompat.widget.AppCompatButton android:text="0" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="000" style="@style/CalculatorButton" />
+        <androidx.appcompat.widget.AppCompatButton android:text="," style="@style/CalculatorButton" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDone"
+            android:text="Xong"
+            android:textColor="@color/white"
+            style="@style/CalculatorButton"
+            android:background="@color/blue"/>
+
+
+    </GridLayout>
+
+
+</LinearLayout>

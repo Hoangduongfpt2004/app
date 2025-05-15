@@ -3,11 +3,28 @@
 
     <style name="Image" parent="Base_ImageView" />
 
-    <style name="Image.Logo" >
-        <item name="android:layout_width">200dp</item>
-        <item name="android:layout_height">120dp</item>
-        <item name="android:src">@drawable/logocuckcuk</item>
+    <style name="Image.Empty" >
+        <item name="android:layout_width">215dp</item>
+        <item name="android:layout_height">197dp</item>
+        <item name="android:src">@drawable/order_water_mark_1</item>
         <item name="android:contentDescription">@string/app_name</item>
+        <item name="layout_constraintTop_toTopOf">parent</item>
+        <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="layout_constraintEnd_toEndOf">parent</item>
+        <item name="android:layout_marginTop">100dp</item>
+    </style>
+
+    <style name="imgArrow">
+        <item name="android:layout_width">78dp</item>
+        <item name="android:layout_height">227dp</item>
+        <item name="android:src">@drawable/right_top_focus</item>
+        <item name="android:elevation">20dp</item>
+        <item name="android:rotation">15</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="layout_constraintTop_toTopOf">parent</item>
+        <item name="layout_constraintEnd_toEndOf">parent</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
     </style>
 
     <style name="Image.LogoLarge">
@@ -45,13 +62,41 @@
     <style name="Image_color">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
-
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
     </style>
 
     <style name="Image_hoicham">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
     </style>
+
+    <style name="Image_Check">
+        <item name="android:layout_width">26dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:visibility">invisible</item>
+    </style>
+
+    <style name="Image_Edit">
+        <item name="android:layout_width">26dp</item>
+        <item name="android:layout_height">24dp</item>
+    </style>
+
+    <style name="Image_table_blue">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+
+
+
+
+
+
+
+
+
 
 
 

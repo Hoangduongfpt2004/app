@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:id="@+id/mainthucdon"
+    tools:context=".AddDish.ThemMonActivity"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Thanh tiêu đề màu xanh -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@color/primary_color">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:contentDescription="Back"
+            android:src="@drawable/ic_back_white_add"
+            style="@style/Image_Back" />
+
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:text="Thêm món"
+            android:layout_centerInParent="true"
+            style="@style/App_Base_Them_Mon" />
+
+        <TextView
+            android:id="@+id/tvSave"
+            android:text="Cất"
+            android:textColor="@android:color/white"
+            style="@style/App_Base_Cat" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Tên món -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:text="Tên món *"
+                style="@style/Tieu_De_Ten_Mon" />
+
+            <EditText
+                android:id="@+id/edtItemName"
+                android:hint="Nhập tên món"
+                style="@style/Nhap_Ten_Mon" />
+        </LinearLayout>
+
+        <!-- Giá bán -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:text="Giá bán"
+                style="@style/Tieu_De_Gia_Ban" />
+
+            <TextView
+                android:id="@+id/tvPrice"
+                android:text="0"
+                style="@style/tv_price" />
+        </LinearLayout>
+
+        <!-- Đơn vị tính -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="37dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:text="Đơn vị tính *"
+                style="@style/Tieu_De_Don_Vi_Tinh" />
+
+            <TextView
+                android:id="@+id/tvUnit"
+                style="@style/Don_vi_Tinh_Gia"
+                android:text="Bao" />
+        </LinearLayout>
+
+        <!-- Màu sắc và biểu tượng -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="24dp"
+            android:weightSum="2">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/btn_color"
+                    android:background="@drawable/circle_red"
+                    android:src="@drawable/baseline_color_lens_24"
+                    android:contentDescription="Màu sắc"
+                    style="@style/Image_color" />
+
+                    <TextView
+                        android:text="Màu sắc"
+                        style="@style/Mau_Sac_Icon"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <ImageView
+                        android:id="@+id/btnIcon"
+                        android:background="@drawable/circle_red"
+                        android:src="@drawable/ic_default"
+                        android:contentDescription="Biểu tượng"
+                        style="@style/Image_hoicham"/>
+
+                    <TextView
+                        android:text="Biểu tượng"
+                        android:textColor="@color/textSecondary"
+                        style="@style/Bieu_Tuong_Them_Icon"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/btnSave"
+            android:text="CẤT"
+            android:textAllCaps="true"
+            style="@style/btn_Save"/>
+
+
+</LinearLayout>

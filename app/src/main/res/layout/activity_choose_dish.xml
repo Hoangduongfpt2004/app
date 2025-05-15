@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context=".ChooseDish.view.ChooseDishActivity">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Toolbar: CHỌN MÓN - THU TIỀN -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="#1565C0"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Nút back -->
+            <ImageView
+                android:id="@+id/img_back"
+                style="@style/Base_Image_Back"
+                android:layout_width="wrap_content"
+                android:src="@drawable/ic_back"
+                app:tint="@android:color/white" />
+
+            <!-- Text Chọn món -->
+            <TextView
+                android:text="Chọn món"
+                style="@style/Id_ChonMon"/>
+
+            <!-- Text Thu tiền -->
+            <TextView
+                android:id="@+id/edtMonny"
+                android:text="Thu tiền"
+                style="@style/tv_ThuTien"/>
+        </LinearLayout>
+
+        <!-- Danh sách món -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMonAn"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <!-- Thanh tổng tiền -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#DCDCDE"
+            android:paddingHorizontal="8dp">
+
+            <ImageView
+                android:src="@drawable/ic_table_blue"
+                style="@style/Image_table_blue"/>
+
+
+            <ImageView
+                android:id="@+id/seting"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/bg_edittext_rounded" />
+
+            <ImageView
+                android:src="@drawable/ic_customer"
+                style="@style/Image_table_blue"/>
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/bg_edittext_rounded" />
+
+            <TextView
+                android:text="Tổng tiền"
+                style="@style/tv_Tong_Tien"/>
+
+            <TextView
+                android:id="@+id/tvTongTien"
+                android:text="0"
+                style="@style/tv_Moony"/>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#BAB9B9"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center"
+            android:weightSum="6">
+
+            <!-- Nút CẮT -->
+
+            <!-- Nút CẤT -->
+            <LinearLayout
+                android:layout_width="50dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="0.8"
+                android:background="@drawable/bg_dialog"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp">
+
+                <TextView
+                    android:id="@+id/edt_x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_dialog"
+                    android:drawableLeft="@drawable/ic_close_red_28dp"
+                    android:gravity="center"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:padding="0dp"
+                    android:textSize="20dp" />
+            </LinearLayout>
+
+            <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="2.5"
+            android:background="@drawable/bg_dialog"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
+
+        <TextView
+            android:id="@+id/editStore"
+            android:text="CẤT"
+            style="@style/tv_Cat"/>
+    </LinearLayout>
+
+    <!-- Nút THU TIỀN -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnCollectMoney"
+        android:text="THU TIỀN"
+        style="@style/btn_ThuTien"/>
+</LinearLayout>
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>
