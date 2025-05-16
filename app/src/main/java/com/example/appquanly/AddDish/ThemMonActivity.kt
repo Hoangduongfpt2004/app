@@ -15,16 +15,18 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.appquanly.UnitOfMeasure.DonViTinhActivity
 import com.example.appquanly.R
+import com.example.appquanly.UnitOfMeasure.DonViTinhActivity
 import java.io.IOException
+import java.util.UUID
 
-class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
+class ThemMonActivity : AppCompatActivity(), ThemMonContract.View {
     private lateinit var btnColor: ImageView
     private lateinit var btnIcon: ImageView
     private lateinit var presenter: ThemMonContract.Presenter
     private var selectedColor: Int = Color.WHITE
     private var selectedIcon: Drawable? = null
+    private var selectedIconName: String? = null // Lưu tên file icon
     private lateinit var alertDialog: AlertDialog
     private lateinit var tvPrice: TextView
     private lateinit var ivBack: ImageView
@@ -33,17 +35,13 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
     private lateinit var edtItemName: EditText
     private lateinit var tvUnit: TextView
 
-
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_dish)
 
         presenter = ThemMonPresenter(this)
 
-        // Ánh xạ các view từ activity_them_mon.xml
+        // Ánh xạ các view
         btnColor = findViewById(R.id.btn_color)
         btnIcon = findViewById(R.id.btnIcon)
         tvPrice = findViewById(R.id.tvPrice)
@@ -52,9 +50,8 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
         tvSave = findViewById(R.id.tvSave)
         btnSave = findViewById(R.id.btnSave)
         edtItemName = findViewById(R.id.edtItemName)
-        tvUnit = findViewById(R.id.tvUnit)
 
-// Xử lý sự kiện cho các nút
+        // Xử lý sự kiện
         btnColor.setOnClickListener {
             presenter.onColorButtonClicked()
         }
@@ -67,67 +64,39 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
             showCalculatorDialog()
         }
 
-
-// Xử lý nút quay lại
         ivBack.setOnClickListener {
             finish()
         }
-        tvUnit.setOnClickListener{
+
+        tvUnit.setOnClickListener {
             val intent = Intent(this, DonViTinhActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_UNIT)
         }
 
+        // Xử lý nút "Cất"
+        val saveClickListener: () -> Unit = {
+            val itemName = edtItemName.text.toString().trim()
+            val price = tvPrice.text.toString().replace(",", "").replace(" ", "").toFloatOrNull()
+            val unit = tvUnit.text.toString().trim()
+            val color = if (selectedColor != Color.WHITE) String.format("#%06X", (0xFFFFFF and selectedColor)) else null
+            val iconFileName = selectedIconName // Lưu tên file icon gốc
 
-
-        // Xử lý nút "Cất" trên thanh tiêu đề
-        tvSave.setOnClickListener {
-            val itemName = edtItemName.text.toString()
-            val price = tvPrice.text.toString().replace(",", "").replace(" ", "").toDoubleOrNull() ?: 0.0
-            val unit = tvUnit.text.toString()
-
-            if (itemName.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập tên món", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (unit.isEmpty()) {
-                Toast.makeText(this, "Vui lòng chọn đơn vị tính", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Chuyển dữ liệu về MenuActivity
-            val intent = Intent(this, ThemMonActivity::class.java)
-            intent.putExtra("ITEM_NAME", itemName)
-            intent.putExtra("PRICE", price)
-            intent.putExtra("SELECTED_UNIT", unit)
-            startActivity(intent)
-            finish()
+            presenter.addInventoryItem(itemName, price, unit, color, iconFileName)
         }
 
-        // Xử lý nút "CẤT" dưới cùng
-        btnSave.setOnClickListener {
-            val itemName = edtItemName.text.toString()
-            val price = tvPrice.text.toString().replace(",", "").replace(" ", "").toDoubleOrNull() ?: 0.0
-            val unit = tvUnit.text.toString()
-
-            if (itemName.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập tên món", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            if (unit.isEmpty()) {
-                Toast.makeText(this, "Vui lòng chọn đơn vị tính", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // Chuyển dữ liệu về MenuActivity
-            val intent = Intent(this,   ThemMonActivity::class.java)
-            intent.putExtra("ITEM_NAME", itemName)
-            intent.putExtra("PRICE", price)
-            intent.putExtra("SELECTED_UNIT", unit)
-            startActivity(intent)
-            finish()
-        }
+        tvSave.setOnClickListener { saveClickListener() }
+        btnSave.setOnClickListener { saveClickListener() }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_UNIT && resultCode == RESULT_OK) {
+            val selectedUnit = data?.getStringExtra("SELECTED_UNIT")
+            if (!selectedUnit.isNullOrEmpty()) {
+                tvUnit.text = selectedUnit
+            }
+        }
+    }
 
     private fun showCalculatorDialog() {
         val dialogView = layoutInflater.inflate(R.layout.activity_calculator, null)
@@ -142,11 +111,7 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
 
         fun formatNumberDisplay(value: String): String {
             val number = value.toDoubleOrNull() ?: return "0"
-            return if (number % 1 == 0.0) {
-                number.toInt().toString()
-            } else {
-                number.toString()
-            }
+            return if (number % 1 == 0.0) number.toInt().toString() else number.toString()
         }
 
         fun updateDisplay() {
@@ -185,9 +150,7 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
                         updateDisplay()
                     }
                     "," -> {
-                        if (!currentInput.contains(".")) {
-                            currentInput += "."
-                        }
+                        if (!currentInput.contains(".")) currentInput += "."
                         updateDisplay()
                     }
                     "+", "-", "x", "/" -> {
@@ -214,21 +177,14 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
 
         btnDone.setOnClickListener {
             if (btnDone.text == "=") {
-                // Tính toán và hiện phép tính
                 if (previousInput.isNotEmpty() && currentInput.isNotEmpty()) {
                     val result = when (operator) {
                         "+" -> previousInput.toDouble() + currentInput.toDouble()
                         "-" -> previousInput.toDouble() - currentInput.toDouble()
                         "*" -> previousInput.toDouble() * currentInput.toDouble()
-                        "/" -> if (currentInput.toDouble() != 0.0) {
-                            previousInput.toDouble() / currentInput.toDouble()
-                        } else {
-                            0.0
-                        }
+                        "/" -> if (currentInput.toDouble() != 0.0) previousInput.toDouble() / currentInput.toDouble() else 0.0
                         else -> 0.0
                     }
-                    val displayResult = "${formatNumberDisplay(previousInput)} $operator ${formatNumberDisplay(currentInput)} = ${formatNumberDisplay(result.toString())}"
-                    edtDisplay.setText(displayResult)
                     currentInput = result.toString()
                     previousInput = ""
                     operator = ""
@@ -237,9 +193,7 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
                     tvPrice.text = formatNumberDisplay(currentInput)
                 }
             } else {
-                if (currentInput.isNotEmpty()) {
-                    tvPrice.text = formatNumberDisplay(currentInput)
-                }
+                if (currentInput.isNotEmpty()) tvPrice.text = formatNumberDisplay(currentInput)
                 alertDialog.dismiss()
             }
         }
@@ -251,8 +205,8 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
 
         alertDialog.show()
     }
+
     private fun applySelectedColorForIconBackground(color: Int) {
-        // Chỉ thay đổi nền, không đổi màu icon
         btnColor.backgroundTintList = ColorStateList.valueOf(color)
         btnIcon.backgroundTintList = ColorStateList.valueOf(color)
     }
@@ -287,8 +241,6 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
                     setOnClickListener {
                         alertDialog.dismiss()
                         presenter.onColorSelected(color)
-
-                        // Cập nhật màu nền cho cả hai nút
                         applySelectedColorForIconBackground(color)
                     }
                 }
@@ -310,11 +262,25 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
         btnColor.setColorFilter(null)
     }
 
+    override fun showSuccess(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        setResult(RESULT_OK)
+        finish()
+    }
+
+    override fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
     private fun showIconPickerDialog() {
         val dialogView = layoutInflater.inflate(R.layout.activity_dialog_select_icon, null)
         val gridLayout = dialogView.findViewById<GridLayout>(R.id.gridIcons)
 
         val iconNames = getIconNamesFromAssets()
+
+        if (iconNames.isEmpty()) {
+            Toast.makeText(this, "Không tìm thấy icon trong thư mục icondefault", Toast.LENGTH_SHORT).show()
+        }
 
         iconNames.forEach { iconName ->
             val iconDrawable = loadDrawableFromAssets(iconName)
@@ -329,6 +295,7 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
                     setImageDrawable(iconDrawable)
                     setOnClickListener {
                         selectedIcon = iconDrawable
+                        selectedIconName = iconName // Lưu tên file icon
                         btnIcon.setImageDrawable(selectedIcon)
                         alertDialog.dismiss()
                     }
@@ -348,9 +315,9 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
 
     private fun getIconNamesFromAssets(): List<String> {
         return try {
-            assets.list("")?.filter { it.endsWith(".png") || it.endsWith(".jpg") } ?: emptyList()
+            assets.list("icondefault")?.filter { it.endsWith(".png") || it.endsWith(".jpg") }?.map { "icondefault/$it" } ?: emptyList()
         } catch (e: IOException) {
-            Toast.makeText(this, "Không thể đọc thư mục assets", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Không thể đọc thư mục icondefault: ${e.message}", Toast.LENGTH_SHORT).show()
             emptyList()
         }
     }
@@ -358,9 +325,14 @@ class ThemMonActivity  : AppCompatActivity(), ThemMonContract.View {
     private fun loadDrawableFromAssets(iconName: String): Drawable? {
         return try {
             val inputStream = assets.open(iconName)
-            Drawable.createFromStream(inputStream, null)
+            Drawable.createFromStream(inputStream, null).also { inputStream.close() }
         } catch (e: IOException) {
+            Toast.makeText(this, "Không thể tải icon $iconName: ${e.message}", Toast.LENGTH_SHORT).show()
             null
         }
+    }
+
+    companion object {
+        private const val REQUEST_UNIT = 100
     }
 }

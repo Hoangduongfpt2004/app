@@ -14,9 +14,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.example.appquanly.Report.Bao_CaoActivity
 import com.example.appquanly.Sunchroize.Dong_BoActivity
 import com.example.appquanly.R
-import com.example.appquanly.AddDish.ThemMonActivity
 import com.example.appquanly.ChooseDish.view.ChooseDishActivity
 import com.example.appquanly.Establish.ThietLapActivity
+import com.example.appquanly.ThucDon.ThucDonActivity
 import com.example.appquanly.login.LoginActivity
 import com.google.android.material.navigation.NavigationView
 
@@ -128,7 +128,7 @@ class BanHangActivity : AppCompatActivity(), BanHangContract.View {
     }
 
     fun Thuc_don() {
-        val intent = Intent(this, ThemMonActivity::class.java)
+        val intent = Intent(this, ThucDonActivity()::class.java)
         startActivity(intent)
     }
 

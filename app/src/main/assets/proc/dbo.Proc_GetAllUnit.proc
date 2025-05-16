@@ -1,0 +1,1 @@
+{"Procedures":[{"Parameters":[],"Name":"Proc_GetAllUnit","Owner":"dbo","Comment":"-- Author: vvtien\r\n-- Create date: 13.8.2016\r\n-- Modifier:\r\n-- Modify Date:\r\n-- Description: Lấy danh sách đơn vị tính","Body":"SELECT * FROM Unit\r\nOrder By UnitName","FileName":null}]}

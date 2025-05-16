@@ -1,0 +1,1 @@
+{"Procedures":[{"Parameters":[],"Name":"ResetLastSyncTime","Owner":"dbo","Comment":"-- Author:\r\n-- Create date:\r\n-- Modifier:\r\n-- Modify Date:\r\n-- Description:","Body":"UPDATE LastSyncTime SET LastSyncTime = NULL","FileName":null}]}

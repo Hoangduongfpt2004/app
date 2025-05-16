@@ -1,0 +1,1 @@
+{"Procedures":[{"Parameters":[],"Name":"Proc_GetAllSaInvoice","Owner":"dbo","Comment":"-- Author: vvtien\r\n-- Create date: 08.08.2016\r\n-- Modifier:\r\n-- Modify Date:\r\n-- Description: lấy ds hóa đơn (bán hàng)","Body":"SELECT * FROM SAinvoice SA\r\nWhere SA.PaymentStatus =1\r\nOrder By SA.CreatedDate  ASC","FileName":null}]}

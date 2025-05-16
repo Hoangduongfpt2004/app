@@ -3,6 +3,8 @@ package com.example.appquanly.SelectDishActivity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appquanly.R
+import com.example.appquanly.ThucDon.InventoryItem
+import com.example.appquanly.ThucDon.InventoryItemRepository
 
 class SelectDishActivity : AppCompatActivity(), SelectDishContract.View {
 
@@ -12,18 +14,23 @@ class SelectDishActivity : AppCompatActivity(), SelectDishContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_dish)
 
-        // Khởi tạo Presenter
-        presenter = SelectDishPresenter(this)
+        // Tạo repository
+        val repository = InventoryItemRepository(this)
 
-        // Gọi Presenter để chuẩn bị dữ liệu
+        // Truyền repository khi khởi tạo presenter
+        presenter = SelectDishPresenter(this, repository)
+
+        // Gọi presenter để tải dữ liệu
         presenter.loadDishList()
     }
 
+
     // Phương thức để hiển thị danh sách món ăn
-    override fun showDishList(dishList: List<String>) {
-        // Cập nhật giao diện với dữ liệu món ăn
-        // Ví dụ: sử dụng RecyclerView hoặc ListView để hiển thị
+    override fun showDishList(dishList: List<InventoryItem>) {
+
+
     }
+
 
     // Phương thức xử lý sự kiện khi chọn món
     override fun onDishSelected(dish: String) {

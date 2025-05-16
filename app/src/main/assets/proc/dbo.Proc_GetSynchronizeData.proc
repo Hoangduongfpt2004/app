@@ -1,0 +1,1 @@
+{"Procedures":[{"Parameters":[],"Name":"Proc_GetSynchronizeData","Owner":"dbo","Comment":"-- Author:\r\n-- Create date:\r\n-- Modifier:\r\n-- Modify Date:\r\n-- Description:","Body":"SELECT S.* FROM SynchronizeData AS S LEFT JOIN SynchronizeConfig AS C ON S.TableName = C.TableName ORDER BY C.SortOrder,S.RefID,C.MasterTableName;","FileName":null}]}

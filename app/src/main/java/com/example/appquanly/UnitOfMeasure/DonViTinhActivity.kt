@@ -19,7 +19,8 @@ class DonViTinhActivity : AppCompatActivity(), DonViTinhContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_unit_of_measure)
 
-        presenter = DonViTinhPresenter(this)
+        presenter = DonViTinhPresenter(this, UnitRepository(this))
+
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { finish() }

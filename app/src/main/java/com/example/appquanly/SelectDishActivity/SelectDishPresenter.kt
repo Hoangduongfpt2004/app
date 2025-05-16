@@ -1,13 +1,16 @@
 package com.example.appquanly.SelectDishActivity
 
-class SelectDishPresenter(private val view: SelectDishContract.View) : SelectDishContract.Presenter {
+import com.example.appquanly.ThucDon.InventoryItemRepository
+
+class SelectDishPresenter(private val view: SelectDishContract.View, val repository: InventoryItemRepository) : SelectDishContract.Presenter {
 
     override fun loadDishList() {
         // Logic để tải danh sách món ăn từ Model (hoặc API, database, ...)
-        val dishList = listOf("Món 1", "Món 2", "Món 3")  // Ví dụ danh sách món ăn
+
+        val items = repository.getAllInventoryItems()
 
         // Gọi View để hiển thị danh sách
-        view.showDishList(dishList)
+        view.showDishList(items)
     }
 
     override fun onDishClicked(dish: String) {

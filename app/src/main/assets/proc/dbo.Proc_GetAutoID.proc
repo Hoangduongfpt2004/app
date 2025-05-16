@@ -1,0 +1,1 @@
+{"Procedures":[{"Parameters":[],"Name":"Proc_GetAutoID","Owner":"dbo","Comment":"-- Author:\r\n-- Create date:\r\n-- Modifier:\r\n-- Modify Date:\r\n-- Description:","Body":"SELECT * FROM AutoID Limit 1","FileName":null}]}

@@ -1,0 +1,1 @@
+{"Procedures":[{"Parameters":[],"Name":"Proc_GetForceSynchronizeTable","Owner":"dbo","Comment":"-- Author:\r\n-- Create date:\r\n-- Modifier:\r\n-- Modify Date:\r\n-- Description:","Body":"select * from [ForceSynchronizeTable] where [IsSynchronized] = 0 GROUP BY [TableName]","FileName":null}]}
