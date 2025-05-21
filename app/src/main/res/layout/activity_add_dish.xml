@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainthucdon"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@android:color/white"
-    android:id="@+id/mainthucdon"
-    tools:context=".AddDish.ThemMonActivity"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:orientation="vertical"
+    tools:context=".AddDish.Add_DishActivity">
 
-    <!-- Thanh tiêu đề màu xanh -->
+    <!-- Thanh tiêu đề -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -20,7 +20,6 @@
             android:contentDescription="Back"
             android:src="@drawable/ic_back_white_add"
             style="@style/Image_Back" />
-
 
         <TextView
             android:id="@+id/tvTitle"
@@ -35,9 +34,11 @@
             style="@style/App_Base_Cat" />
     </RelativeLayout>
 
+    <!-- Nội dung chính -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:orientation="vertical"
         android:padding="16dp">
 
@@ -118,39 +119,97 @@
                     android:contentDescription="Màu sắc"
                     style="@style/Image_color" />
 
-                    <TextView
-                        android:text="Màu sắc"
-                        style="@style/Mau_Sac_Icon"/>
-                </LinearLayout>
+                <TextView
+                    android:text="Màu sắc"
+                    style="@style/Mau_Sac_Icon" />
+            </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
 
-                    <ImageView
-                        android:id="@+id/btnIcon"
-                        android:background="@drawable/circle_red"
-                        android:src="@drawable/ic_default"
-                        android:contentDescription="Biểu tượng"
-                        style="@style/Image_hoicham"/>
+                <ImageView
+                    android:id="@+id/btnIcon"
+                    android:background="@drawable/circle_red"
+                    android:src="@drawable/ic_default"
+                    android:contentDescription="Biểu tượng"
+                    style="@style/Image_hoicham" />
 
-                    <TextView
-                        android:text="Biểu tượng"
-                        android:textColor="@color/textSecondary"
-                        style="@style/Bieu_Tuong_Them_Icon"/>
-                </LinearLayout>
+                <TextView
+                    android:text="Biểu tượng"
+                    android:textColor="@color/textSecondary"
+                    style="@style/Bieu_Tuong_Them_Icon" />
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Checkbox ngừng bán -->
+        <LinearLayout
+            android:id="@+id/layoutNgungBan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp"
+            android:visibility="gone">
 
-        <Button
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trạng Thái"
+                android:textSize="16dp"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/textPrimary" />
+
+            <CheckBox
+                android:id="@+id/checkboxInactive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ngừng bán"
+                android:textSize="16sp"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/textPrimary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Nút XÓA - CẤT -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnDelete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="XÓA"
+            android:textAllCaps="true"
+            android:visibility="gone"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_red_dark" />
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="wrap_content" />
+
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="CẤT"
             android:textAllCaps="true"
-            style="@style/btn_Save"/>
-
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/primary_color" />
+    </LinearLayout>
 
 </LinearLayout>

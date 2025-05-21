@@ -1,6 +1,6 @@
 package com.example.appquanly.SelectDishActivity
 
-import com.example.appquanly.ThucDon.InventoryItem
+import com.example.appquanly.data.sqlite.Entity.InventoryItem
 
 interface SelectDishContract {
     interface View {

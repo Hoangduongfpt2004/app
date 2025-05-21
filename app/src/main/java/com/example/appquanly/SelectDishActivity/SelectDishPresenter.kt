@@ -1,6 +1,6 @@
 package com.example.appquanly.SelectDishActivity
 
-import com.example.appquanly.ThucDon.InventoryItemRepository
+import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
 
 class SelectDishPresenter(private val view: SelectDishContract.View, val repository: InventoryItemRepository) : SelectDishContract.Presenter {
 

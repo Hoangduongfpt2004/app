@@ -6,7 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.appquanly.Sale.BanHangActivity
+import com.example.appquanly.SalesSreen.Sale_SreenActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 
-            val intent = Intent(this, BanHangActivity::class.java)
+            val intent = Intent(this, Sale_SreenActivity::class.java)
             startActivity(intent)
 
 

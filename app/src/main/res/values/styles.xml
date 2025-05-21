@@ -10,9 +10,6 @@
         <item name="android:textColorSecondary">@color/textSecondary</item>
     </style>
 
-
-
-
     <!-- Base Button Style -->
     <style name="BaseButtonStyle">
         <item name="android:background">@drawable/button_background</item>
@@ -20,5 +17,16 @@
         <item name="android:textSize">14sp</item>
         <item name="android:padding">12dp</item>
     </style>
+
+
+    <style name="InvoiceHeader">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="InvoiceRow">
+        <item name="android:textSize">14sp</item>
+    </style>
+
 
 </resources>

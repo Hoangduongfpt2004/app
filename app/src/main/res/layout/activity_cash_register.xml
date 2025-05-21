@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:background="#F5F5F5"
     android:padding="12dp"
-    tools:context=".CashRegiter.CashRegisterActivity">
+    tools:context=".CashRegister.CashRegisterActivity">
 
     <!-- Title -->
     <TextView

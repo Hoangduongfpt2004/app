@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Report.Bao_CaoActivity">
+    tools:context=".Report.ReportActivity">
 
     <!-- Toolbar -->
 

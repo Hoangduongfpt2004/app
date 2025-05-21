@@ -14,64 +14,67 @@
         android:theme="@style/Theme.AppQuanLy"
         tools:targetApi="31">
         <activity
-            android:name=".ThucDon.ThucDonActivity"
+            android:name=".Invoice.InvoiceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MenuCategory.Menu_CategoryActivity"
             android:exported="false" />
         <activity
             android:name=".SalePutIn.SaleeActivity"
             android:exported="false" />
         <activity
-            android:name=".CashRegiter.CashRegisterActivity"
+            android:name=".CashRegister.CashRegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".HoaDon.HoaDonActivity"
+            android:name=".Billing.BillingActivity"
             android:exported="false" />
         <activity
             android:name=".ChooseDish.view.ChooseDishActivity"
             android:exported="false" />
         <activity
-            android:name=".UnitOfMeasure.DonViTinhActivity"
+            android:name=".UnitOfMeasure.Unit_Of_MeasureActivity"
             android:exported="false" />
         <activity
-            android:name=".AddProduct.Them_San_PhamActivity"
+            android:name=".AddProduct.Add_ProductActivity"
             android:exported="false" />
         <activity
-            android:name=".Establish.ThietLapActivity"
+            android:name=".Setup.Set_upActivity"
             android:exported="false" />
         <activity
-            android:name=".Sunchroize.Dong_BoActivity"
+            android:name=".Sychronize.SychronizeActivity"
             android:exported="false" />
         <activity
             android:name=".fragment_sync_data"
             android:exported="false" />
         <activity
-            android:name=".AddDish.ThemMonActivity"
+            android:name=".AddDish.Add_DishActivity"
             android:exported="false" />
         <activity
-            android:name=".LogOut.Dang_XuatActivity"
+            android:name=".LogOut.Log_OutActivity"
             android:exported="false" />
         <activity
-            android:name=".CreatePassWord.Dat_Mat_KhauActivity"
+            android:name=".CreatePassWord.Create_Pass_WordActivity"
             android:exported="false" />
         <activity
-            android:name=".ProductInformation.Thong_Tin_San_PhamActivity"
+            android:name=".ProductInformation.ProductlnformationActivity"
             android:exported="false" />
         <activity
             android:name=".Comments.Gop_Y_Voi_Nha_Phat_TrienActivity"
             android:exported="false" />
         <activity
-            android:name=".Evaluate.Danh_Gia_Ung_DungActivity"
+            android:name=".Review.ReviewActivity"
             android:exported="false" />
         <activity
-            android:name=".IntroduceYourself.Gioi_Thieu_Cho_BanActivity"
+            android:name=".UserIntro.User_IntroActivity"
             android:exported="false" />
         <activity
-            android:name=".Notification.Thong_BaoActivity"
+            android:name=".Notification.NotificationActivity"
             android:exported="false" />
         <activity
-            android:name=".LinkAccount.Lien_Ket_Tai_KhoanActivity"
+            android:name=".LinkAccount.Link_AccountActivity"
             android:exported="false" />
         <activity
-            android:name=".Report.Bao_CaoActivity"
+            android:name=".Report.ReportActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
@@ -83,18 +86,18 @@
             </intent-filter>
         </activity> <!-- Login Activity -->
         <activity
-            android:name=".login.LoginActivity"
+            android:name=".Login.LoginActivity"
             android:exported="true" /> <!-- Register Activity -->
         <activity
-            android:name=".register.RegisterActivity"
+            android:name=".Register.RegisterActivity"
             android:exported="true" />
-        <activity android:name=".LoginPhoneandEmail.LoginWithPhoneEmailActivity" />
+        <activity android:name=".LoginMethod.Login_MethodActivity" />
         <activity android:name=".ForgotPassword.ForgotPasswordActivity" />
         <activity android:name=".SelectDishActivity.SelectDishActivity">
 
             <!-- Các thông tin cấu hình khác của Activity nếu cần -->
         </activity>
-        <activity android:name=".Sale.BanHangActivity" />
+        <activity android:name=".SalesSreen.Sale_SreenActivity" />
     </application>
 
 </manifest>

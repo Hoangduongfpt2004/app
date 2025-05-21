@@ -1,7 +1,7 @@
 package com.example.appquanly
 
 import android.app.Application
-import com.example.appquanly.data.local.DatabaseCopyHelper
+import com.example.appquanly.data.sqlite.Local.DatabaseCopyHelper
 
 class MyApplication : Application() {
     override fun onCreate() {

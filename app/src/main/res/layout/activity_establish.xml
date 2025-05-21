@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".Establish.ThietLapActivity">
+    tools:context=".Setup.Set_upActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/Toobal_ThietLap"

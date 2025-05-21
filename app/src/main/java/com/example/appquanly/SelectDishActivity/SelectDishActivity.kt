@@ -3,8 +3,8 @@ package com.example.appquanly.SelectDishActivity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appquanly.R
-import com.example.appquanly.ThucDon.InventoryItem
-import com.example.appquanly.ThucDon.InventoryItemRepository
+import com.example.appquanly.data.sqlite.Entity.InventoryItem
+import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
 
 class SelectDishActivity : AppCompatActivity(), SelectDishContract.View {
 
@@ -12,7 +12,7 @@ class SelectDishActivity : AppCompatActivity(), SelectDishContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_select_dish)
+        setContentView(R.layout.item_choose_dish)
 
         // Tạo repository
         val repository = InventoryItemRepository(this)
