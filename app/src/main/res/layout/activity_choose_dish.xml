@@ -8,7 +8,6 @@
     android:orientation="horizontal"
     tools:context=".ChooseDish.view.ChooseDishActivity">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -62,24 +61,33 @@
                 android:src="@drawable/ic_table_blue"
                 style="@style/Image_table_blue"/>
 
-
-            <ImageView
+            <!-- Thay ImageView seting thành TextView để hiển thị giá trị -->
+            <TextView
                 android:id="@+id/seting"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
                 android:layout_marginEnd="8dp"
-                android:src="@drawable/bg_edittext_rounded" />
+                android:background="@drawable/bg_edittext_rounded"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="#000000"
+                android:textSize="14sp" />
 
             <ImageView
                 android:src="@drawable/ic_customer"
                 style="@style/Image_table_blue"/>
 
-            <ImageView
+            <!-- Thay ImageView avatar thành TextView để hiển thị giá trị -->
+            <TextView
                 android:id="@+id/avatar"
                 android:layout_width="27dp"
                 android:layout_height="27dp"
                 android:layout_marginEnd="8dp"
-                android:src="@drawable/bg_edittext_rounded" />
+                android:background="@drawable/bg_edittext_rounded"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="#000000"
+                android:textSize="14sp" />
 
             <TextView
                 android:text="Tổng tiền"
@@ -90,7 +98,6 @@
                 android:text="0"
                 style="@style/tv_Moony"/>
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -133,35 +140,32 @@
             </LinearLayout>
 
             <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="2.5"
-            android:background="@drawable/bg_dialog"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp">
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="2.5"
+                android:background="@drawable/bg_dialog"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp">
 
-        <TextView
-            android:id="@+id/editStore"
-            android:text="CẤT"
-            style="@style/tv_Cat"/>
+                <TextView
+                    android:id="@+id/editStore"
+                    android:text="CẤT"
+                    style="@style/tv_Cat"/>
+            </LinearLayout>
+
+            <!-- Nút THU TIỀN -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnCollectMoney"
+                android:text="THU TIỀN"
+                style="@style/btn_ThuTien"/>
+        </LinearLayout>
+
     </LinearLayout>
-
-    <!-- Nút THU TIỀN -->
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnCollectMoney"
-        android:text="THU TIỀN"
-        style="@style/btn_ThuTien"/>
-</LinearLayout>
-
-    </LinearLayout>
-
-
-
 
 </LinearLayout>

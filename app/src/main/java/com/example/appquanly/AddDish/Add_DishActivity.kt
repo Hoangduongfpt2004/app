@@ -15,6 +15,8 @@ import com.example.appquanly.R
 import com.example.appquanly.UnitOfMeasure.Unit_Of_MeasureActivity
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import java.io.IOException
+import java.text.NumberFormat
+import java.util.Locale
 
 class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
     private lateinit var btnColor: ImageView
@@ -129,10 +131,12 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         // Nút lưu (có thể 2 nút)
         val saveClickListener = {
             val itemName = edtItemName.text.toString().trim()
-            val price = tvPrice.text.toString().replace(",", "").toFloatOrNull()
             val unit = tvUnit.text.toString().trim()
             val color = if (selectedColor != Color.WHITE) String.format("#%06X", 0xFFFFFF and selectedColor) else null
             val isInactive = checkboxInactive.isChecked
+            val priceText = tvPrice.text.toString().replace(",", "")
+            val price = priceText.toFloatOrNull()
+
 
             if (isEdit && editingDishId != null) {
                 presenter.updateInventoryItem(editingDishId!!, itemName, price, unit, color, selectedIconName, isInactive)
@@ -145,6 +149,14 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         tvSave.setOnClickListener { saveClickListener() }
         btnSave.setOnClickListener { saveClickListener() }
     }
+
+    private fun formatPrice(value: Double): String {
+        val formatter = NumberFormat.getNumberInstance(Locale("vi", "VN"))
+        return formatter.format(value)
+    }
+
+
+
 
 
 
@@ -171,7 +183,7 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         var isInOperation = false
 
         fun formatNumberDisplay(value: String): String {
-            val number = value.toDoubleOrNull() ?: return "0"
+            val number = value.toDoubleOrNull() ?: return "0.0"
             return if (number % 1 == 0.0) number.toInt().toString() else number.toString()
         }
 
@@ -246,13 +258,14 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
                     operator = ""
                     isInOperation = false
                     btnDone.text = "Xong"
-                    tvPrice.text = formatNumberDisplay(currentInput)
+                    tvPrice.text = formatPrice(currentInput.toDouble())
                 }
             } else {
-                if (currentInput.isNotEmpty()) tvPrice.text = formatNumberDisplay(currentInput)
+                if (currentInput.isNotEmpty()) tvPrice.text = formatPrice(currentInput.toDouble())
                 alertDialog.dismiss()
             }
         }
+
 
         alertDialog = AlertDialog.Builder(this)
             .setView(dialogView)
@@ -333,17 +346,14 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
     }
 
     override fun showInventoryItemToEdit(item: InventoryItem) {
-
         layoutNgungBan.visibility = View.VISIBLE
 
-        // Gán dữ liệu từ item lên giao diện (EditText, Spinner, v.v.)
         edtItemName.setText(item.InventoryItemName)
-        tvPrice.setText(item.Price?.toString() ?: "")
-        tvUnit.setText(item.UnitID)
+        tvPrice.text = item.Price?.let { formatPrice(it.toDouble()) } ?: ""
+        tvUnit.text = item.UnitID
         checkboxInactive.isChecked = item.Inactive == true
-
-
     }
+
 
 
     private fun showIconPickerDialog() {

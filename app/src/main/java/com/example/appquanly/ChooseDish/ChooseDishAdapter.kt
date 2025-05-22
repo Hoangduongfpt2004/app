@@ -22,12 +22,9 @@ class ChooseDishAdapter(
     interface OnDishActionListener {
         fun onIncrease(item: InventoryItem)
         fun onDecrease(item: InventoryItem)
+        fun onQuantityClick(item: InventoryItem, position: Int)
     }
 
-    // Map để lưu số lượng món theo ID
-    private val quantityMap = mutableMapOf<String, Int>()
-
-    // Set lưu vị trí các item đang mở (có layout tăng giảm hiển thị)
     private val expandedPositions = mutableSetOf<Int>()
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -37,8 +34,7 @@ class ChooseDishAdapter(
         val tvQuantity: TextView = itemView.findViewById(R.id.tvQuantity)
         val btnIncrease: ImageView = itemView.findViewById(R.id.btnIncrease)
         val btnDecrease: ImageView = itemView.findViewById(R.id.btnDecrease)
-        val layoutQuantity: LinearLayout =
-            itemView.findViewById(R.id.layoutQuantity)  // layout bao quanh số lượng + nút
+        val layoutQuantity: LinearLayout = itemView.findViewById(R.id.layoutQuantity)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -53,19 +49,17 @@ class ChooseDishAdapter(
         val item = list[position]
         val context = holder.itemView.context
 
-        // Tên món
-        holder.tvName.text = item.InventoryItemName ?: "Tên món trống"
+        holder.tvName.text = item.InventoryItemName  ?: "Tên món trống"
 
-        // Giá
         val priceFormatted = item.Price?.toInt()?.let {
             String.format("%,d đ", it)
         } ?: "0 đ"
         holder.tvPrice.text = priceFormatted
 
-        // Load icon từ assets
         item.IconFileName?.let { iconName ->
+            val assetPath = "icondefault/$iconName"
             try {
-                context.assets.open(iconName).use { inputStream ->
+                context.assets.open(assetPath).use { inputStream ->
                     val drawable = Drawable.createFromStream(inputStream, null)
                     holder.ivIcon.setImageDrawable(drawable)
                 }
@@ -74,7 +68,6 @@ class ChooseDishAdapter(
             }
         } ?: holder.ivIcon.setImageResource(R.drawable.ic_default)
 
-        // Màu icon
         item.Color?.let { colorString ->
             try {
                 holder.ivIcon.backgroundTintList =
@@ -86,35 +79,29 @@ class ChooseDishAdapter(
             holder.ivIcon.backgroundTintList = null
         }
 
-        val id = item.InventoryItemID ?: return
-        val currentQuantity = quantityMap[id] ?: 0
+        // Lấy số lượng (quantity) từ InventoryItem, mặc định 0 nếu null
+        val currentQuantity = item.quantity ?: 0
         holder.tvQuantity.text = currentQuantity.toString()
 
-        // Hiển thị hoặc ẩn layout số lượng tùy theo expandedPositions có chứa position hay không
+        // Hiển thị layout quantity nếu item đang mở rộng
         holder.layoutQuantity.visibility = if (expandedPositions.contains(position)) View.VISIBLE else View.GONE
 
-        // Xử lý tăng số lượng
+        // Nút tăng số lượng
         holder.btnIncrease.setOnClickListener {
-            val newQuantity = currentQuantity + 1
-            quantityMap[id] = newQuantity
-            holder.tvQuantity.text = newQuantity.toString()
             listener.onIncrease(item)
         }
 
-        // Xử lý giảm số lượng
+        // Nút giảm số lượng
         holder.btnDecrease.setOnClickListener {
-            val newQuantity = if (currentQuantity > 0) currentQuantity - 1 else 0
-            quantityMap[id] = newQuantity
-            holder.tvQuantity.text = newQuantity.toString()
             listener.onDecrease(item)
-
-            if (newQuantity == 0 && expandedPositions.contains(position)) {
-                expandedPositions.remove(position)
-                notifyItemChanged(position)
-            }
         }
 
-        // Xử lý click vào item để mở/đóng phần số lượng
+        // Click vào số lượng để mở giao diện nhập thủ công hoặc xử lý khác
+        holder.tvQuantity.setOnClickListener {
+            listener.onQuantityClick(item, position)
+        }
+
+        // Click vào toàn bộ item để mở/thu gọn phần quantity
         holder.itemView.setOnClickListener {
             if (expandedPositions.contains(position)) {
                 expandedPositions.remove(position)
@@ -125,16 +112,19 @@ class ChooseDishAdapter(
         }
     }
 
+    // Cập nhật toàn bộ danh sách và refresh adapter
     fun updateData(newList: List<InventoryItem>) {
         list.clear()
         list.addAll(newList)
         notifyDataSetChanged()
     }
-    fun getQuantityMap(): Map<String, Int> = quantityMap
 
-    fun getCurrentItems(): List<InventoryItem> {
-        return list
+    // Cập nhật số lượng cho 1 item tại vị trí và refresh item đó
+    fun updateQuantityAt(position: Int, quantity: Int) {
+        if (position in list.indices) {
+            val item = list[position]
+            item.quantity = quantity
+            notifyItemChanged(position)
+        }
     }
-
-
 }

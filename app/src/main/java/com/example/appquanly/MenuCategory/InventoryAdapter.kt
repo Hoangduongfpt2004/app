@@ -8,13 +8,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import java.io.IOException
+import java.text.NumberFormat
+import java.util.*
 
 class InventoryAdapter(
     private val itemList: MutableList<InventoryItem>,
@@ -40,10 +41,9 @@ class InventoryAdapter(
         val item = itemList[position]
 
         holder.textViewName.text = item.InventoryItemName ?: "No Name"
-        holder.textViewPrice.text = item.Price?.let { "Price: $%.2f".format(it) } ?: "No Price"
+        holder.textViewPrice.text = item.Price?.let { "Giá tiền: ${formatCurrencyVND(it)}" } ?: "No Price"
 
         val inactive = item.Inactive == true
-
 
         if (inactive) {
             holder.tvTrangThai.visibility = View.VISIBLE
@@ -91,5 +91,10 @@ class InventoryAdapter(
         itemList.clear()
         itemList.addAll(newList)
         notifyDataSetChanged()
+    }
+
+    private fun formatCurrencyVND(amount: Float): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("vi", "VN"))
+        return format.format(amount)
     }
 }

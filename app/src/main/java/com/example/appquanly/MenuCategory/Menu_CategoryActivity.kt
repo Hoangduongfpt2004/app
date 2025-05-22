@@ -7,7 +7,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.AddDish.Add_DishActivity
@@ -51,6 +53,13 @@ class Menu_CategoryActivity : AppCompatActivity(), Menu_CategoryContract.View {
         toggle.syncState()
 
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        // ✅ Thêm dòng kẻ chia item (divider)
+        val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        ContextCompat.getDrawable(this, R.drawable.divider)?.let {
+            divider.setDrawable(it)
+        }
+        recyclerView.addItemDecoration(divider)
 
         adapter = InventoryAdapter(itemList, this, { item ->
             val intent = Intent(this, Add_DishActivity::class.java).apply {

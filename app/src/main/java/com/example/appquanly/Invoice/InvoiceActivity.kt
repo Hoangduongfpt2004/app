@@ -3,131 +3,111 @@ package com.example.appquanly.Invoice
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.*
+import android.widget.EditText
+import android.widget.TableLayout
+import android.widget.TableRow
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
-import java.text.DecimalFormat
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 
 class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
 
-    private lateinit var presenter: InvoiceContract.Presenter
-    private lateinit var tableLayout: TableLayout
     private lateinit var tvSoHoaDon: TextView
     private lateinit var tvNgay: TextView
     private lateinit var tvTienKhachDua: EditText
     private lateinit var tvTienTraLai: TextView
-    private lateinit var btnXong: Button
     private lateinit var tvTongTien: TextView
+    private lateinit var tableLayout: TableLayout
 
-    private val moneyFormat = DecimalFormat("#,###")
+    private var totalAmount = 0.0
+
+    // Giả sử bạn có Presenter
+    private lateinit var presenter: InvoiceContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_invoice2)
 
-        tableLayout = findViewById(R.id.tableLayout)
         tvSoHoaDon = findViewById(R.id.tvSoHoaDon)
         tvNgay = findViewById(R.id.tvNgay)
         tvTienKhachDua = findViewById(R.id.tvTienKhachDua)
         tvTienTraLai = findViewById(R.id.tvTienTraLai)
-        btnXong = findViewById(R.id.btnXong)
         tvTongTien = findViewById(R.id.tvTongTien)
+        tableLayout = findViewById(R.id.tableLayout)
 
-        presenter = InvoicePresenter(this, this)
+        // Khởi tạo Presenter nếu có
+        // presenter = InvoicePresenter(this)
 
-        val selectedItems = intent.getParcelableArrayListExtra<InventoryItem>("selected_items")
-        selectedItems?.let {
-            presenter.setSelectedItems(it)
-        } ?: run {
-            presenter.setSelectedItems(emptyList())
-        }
+        // Lấy dữ liệu danh sách hóa đơn từ Intent (giả sử là SAInvoiceDetail)
+        val invoiceDetails = intent.getParcelableArrayListExtra<SAInvoiceDetail>("invoice_details") ?: emptyList()
 
-        presenter.loadInvoiceData()
+        // Lấy mã hóa đơn
+        val refID = intent.getStringExtra("refID") ?: ""
 
-        btnXong.setOnClickListener {
-            val tienKhachDua = tvTienKhachDua.text.toString().replace(".", "").toDoubleOrNull() ?: 0.0
-            presenter.onDoneClick(tienKhachDua)
-            finish()
-        }
+        showInvoiceInfo(refID, java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(System.currentTimeMillis()))
+        displayInvoiceDetails(invoiceDetails)
 
         tvTienKhachDua.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                val cleanString = s.toString().replace(".", "")
-                val amount = cleanString.toDoubleOrNull() ?: 0.0
-                presenter.calculateInvoice(amount)
+                val given = s.toString().toDoubleOrNull() ?: 0.0
+                val change = given - totalAmount
+                showRemainAmount(if (change >= 0) change else 0.0)
             }
-
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
     }
 
-    override fun showInvoiceData(items: List<InventoryItem>) {
+    private fun displayInvoiceDetails(details: List<SAInvoiceDetail>) {
         tableLayout.removeAllViews()
+        totalAmount = 0.0
 
-        // Header
-        val headerRow = TableRow(this).apply {
-            addView(createCell("Tên hàng", true))
-            addView(createCell("SL", true))
-            addView(createCell("Đơn giá", true))
-            addView(createCell("Thành tiền", true))
-        }
-        tableLayout.addView(headerRow)
+        details.forEach { detail ->
+            val row = TableRow(this)
 
-        var tongTien = 0.0
-        for (item in items) {
-            val soLuong = item.UseCount
-            val donGia = item.Price ?: 0f
-            val thanhTien = soLuong * donGia
-            tongTien += thanhTien
+            val tvName = TextView(this).apply { text = detail.InventoryItemName }
+            val tvQuantity = TextView(this).apply { text = detail.Quantity.toInt().toString() }
+            val tvUnitPrice = TextView(this).apply { text = detail.UnitPrice.toInt().toString() }
+            val tvAmount = TextView(this).apply { text = detail.Amount.toInt().toString() }
 
-            val row = TableRow(this).apply {
-                addView(createCell(item.InventoryItemName ?: ""))
-                addView(createCell(soLuong.toString()))
-                addView(createCell(moneyFormat.format(donGia.toDouble())))
-                addView(createCell(moneyFormat.format(thanhTien.toDouble())))
-            }
+            row.addView(tvName)
+            row.addView(tvQuantity)
+            row.addView(tvUnitPrice)
+            row.addView(tvAmount)
+
             tableLayout.addView(row)
+
+            totalAmount += detail.Amount.toDouble()
         }
 
-        // Dòng tổng tiền
-        val totalRow = TableRow(this).apply {
-            addView(createCell("Tổng cộng", true))
-            addView(createCell(""))
-            addView(createCell(""))
-            addView(createCell(moneyFormat.format(tongTien), true))
-        }
-        tableLayout.addView(totalRow)
+        showTotalAmount(totalAmount)
+    }
 
-        showTotalAmount(tongTien)
+    override fun showInvoiceData(items: List<InventoryItem>) {
+        // Bạn có thể xử lý nếu dùng InventoryItem thay vì SAInvoiceDetail
     }
 
     override fun showTotalAmount(amount: Double) {
-        tvTongTien.text = "Tiền khách phải trả: ${moneyFormat.format(amount)}"
+        tvTongTien.text = amount.toInt().toString()
     }
 
     override fun showReceiveAmount(amount: Double) {
-        // Nếu muốn format lại tiền khách đưa:
-        // tvTienKhachDua.setText(moneyFormat.format(amount))
+        tvTienKhachDua.setText(amount.toInt().toString())
     }
 
     override fun showRemainAmount(remain: Double) {
-        tvTienTraLai.text = "Tiền trả lại: ${moneyFormat.format(remain)}"
+        tvTienTraLai.text = remain.toInt().toString()
     }
 
     override fun showInvoiceInfo(refNo: String, date: String) {
-        tvSoHoaDon.text = "Số: $refNo"
+        tvSoHoaDon.text = "Hóa đơn: $refNo"
         tvNgay.text = "Ngày: $date"
     }
 
-    private fun createCell(text: String, isHeader: Boolean = false): TextView {
-        return TextView(this).apply {
-            setPadding(16, 12, 16, 12)
-            this.text = text
-            if (isHeader) {
-                setTypeface(null, android.graphics.Typeface.BOLD)
-            }
-        }
+    override fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

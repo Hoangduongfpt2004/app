@@ -2,6 +2,7 @@ package com.example.appquanly.ChooseDish.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -15,6 +16,7 @@ import com.example.appquanly.Invoice.InvoiceActivity
 import com.example.appquanly.R
 import com.example.appquanly.SalePutIn.SaleeActivity
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
 
 class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
@@ -22,13 +24,14 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
     private lateinit var presenter: ChooseDishPresenter
     private lateinit var tvTotalMoney: TextView
     private lateinit var btnBack: ImageView
-    private lateinit var btnSetting: ImageView
-    private lateinit var btnAvatar: ImageView
-    private lateinit var btnCollectMoney: TextView
+    private lateinit var btnSetting: TextView
+    private lateinit var btnAvatar: TextView
+    private lateinit var btnCollectMoney: Button
     private lateinit var edit_x: TextView
     private lateinit var edit_store: TextView
     private lateinit var adapter: ChooseDishAdapter
     private lateinit var recyclerView: RecyclerView
+    private var currentTargetTextView: TextView? = null
 
     companion object {
         const val REQUEST_CODE_CALCULATOR = 1001
@@ -58,6 +61,13 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             override fun onDecrease(item: InventoryItem) {
                 presenter.onDecreaseItem(item)
             }
+
+            override fun onQuantityClick(item: InventoryItem, position: Int) {
+                currentTargetTextView = recyclerView.findViewHolderForAdapterPosition(position)
+                    ?.itemView?.findViewById(R.id.tvQuantity)
+
+                openCalculatorForQuantity(item, position)
+            }
         })
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -72,10 +82,12 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
         }
 
         btnSetting.setOnClickListener {
+            currentTargetTextView = btnSetting
             presenter.onSettingClick()
         }
 
         btnAvatar.setOnClickListener {
+            currentTargetTextView = btnAvatar
             presenter.onAvatarClick()
         }
 
@@ -108,19 +120,37 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
     override fun openCalculator() {
         val calculatorDialog = CalculatorDialogFragment { result ->
             showMessage("Giá trị máy tính trả về: $result")
-            val total = result.toDoubleOrNull() ?: 0.0
-            updateTotalMoney(total)
+            currentTargetTextView?.text = result
+        }
+        calculatorDialog.show(supportFragmentManager, "CalculatorDialog")
+    }
+
+    private fun openCalculatorForQuantity(item: InventoryItem, position: Int) {
+        val calculatorDialog = CalculatorDialogFragment { result ->
+            showMessage("Giá trị máy tính trả về: $result")
+
+            val quantity = result.toIntOrNull()
+            if (quantity != null && quantity >= 0) {
+                adapter.updateQuantityAt(position, quantity)
+                presenter.updateQuantityForItem(item, quantity)
+            } else {
+                showMessage("Giá trị nhập không hợp lệ!")
+            }
         }
         calculatorDialog.show(supportFragmentManager, "CalculatorDialog")
     }
 
     override fun updateTotalMoney(total: Double) {
-        tvTotalMoney.text = total.toInt().toString()
+        tvTotalMoney.text = total.toString()
     }
 
-    override fun navigateToInvoice(selectedItems: List<InventoryItem>) {
+    override fun navigateToInvoice(selectedDetails: List<SAInvoiceDetail>) {
         val intent = Intent(this, InvoiceActivity::class.java)
-        intent.putParcelableArrayListExtra("selected_items", ArrayList(selectedItems))
+        intent.putParcelableArrayListExtra("invoice_details", ArrayList(selectedDetails))
         startActivity(intent)
+        finish()
     }
+
+
+    override fun getContext() = this
 }

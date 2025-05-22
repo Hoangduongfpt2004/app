@@ -6,6 +6,8 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
@@ -48,6 +50,20 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+
+        // Thêm dòng kẻ ngang (divider) cho RecyclerView
+        val dividerItemDecoration = DividerItemDecoration(
+            recyclerView.context,
+            DividerItemDecoration.VERTICAL
+        )
+        // Nếu muốn dùng drawable custom, tạo file res/drawable/divider_line.xml rồi uncomment đoạn dưới:
+        /*
+        val dividerDrawable = ContextCompat.getDrawable(this, R.drawable.divider_line)
+        if (dividerDrawable != null) {
+            dividerItemDecoration.setDrawable(dividerDrawable)
+        }
+        */
+        recyclerView.addItemDecoration(dividerItemDecoration)
 
         findViewById<Button>(R.id.btnDone).setOnClickListener {
             finish()

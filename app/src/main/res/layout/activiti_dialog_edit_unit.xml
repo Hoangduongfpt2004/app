@@ -14,7 +14,7 @@
         android:padding="8dp">
 
         <TextView
-            android:text="Sửa đơn vị tính"
+            android:text="Thêm đơn vị tính"
             style="@style/Sua_Don_Vi_Tinh"/>
 
         <ImageView
