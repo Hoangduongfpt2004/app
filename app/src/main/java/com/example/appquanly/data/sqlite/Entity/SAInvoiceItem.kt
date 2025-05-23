@@ -2,6 +2,7 @@ package com.example.appquanly.data.sqlite.Entity
 
 import java.io.Serializable
 
+
 data class SAInvoiceItem(
     val refId: String,
     val refType: Int,

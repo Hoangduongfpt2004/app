@@ -3,13 +3,13 @@ package com.example.appquanly.ChooseDish.presenter
 import com.example.appquanly.ChooseDish.contract.ChooseDishContract
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
 import com.example.appquanly.data.sqlite.Local.SAInvoiceDetailRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
-import kotlin.time.times
 
 class ChooseDishPresenter(
     private val view: ChooseDishContract.View,
@@ -20,6 +20,7 @@ class ChooseDishPresenter(
     private val invoiceDetailRepo = SAInvoiceDetailRepository(view.getContext())
     private var itemList: MutableList<InventoryItem> = mutableListOf()
     private var totalMoney = 0.0
+    private var refID: String = UUID.randomUUID().toString()
 
     override fun loadItemsFromDB() {
         scope.launch {
@@ -29,9 +30,13 @@ class ChooseDishPresenter(
             view.updateTotalMoney(totalMoney)
         }
     }
+    override fun goToInvoiceScreen(refId: String) {
+        view.openInvoiceScreen(refId)
+    }
+
 
     override fun onBackClick() {
-        // Có thể thêm xử lý nếu cần
+        // Xử lý khi bấm nút Back nếu cần
     }
 
     override fun onSettingClick() {
@@ -54,17 +59,16 @@ class ChooseDishPresenter(
 
     override fun onDecreaseItem(item: InventoryItem) {
         val currentQty = item.quantity
-        if (currentQty > 0) updateQuantityForItem(item, currentQty - 1)
+        if (currentQty > 0) {
+            updateQuantityForItem(item, currentQty - 1)
+        }
     }
 
     override fun updateQuantityForItem(item: InventoryItem, quantity: Int) {
         scope.launch {
             item.quantity = quantity
-            // Cập nhật database
             inventoryRepo.updateInventoryItem(item)
-            // Tính lại tổng tiền
             recalculateTotalMoney()
-            // Cập nhật lại danh sách và tổng tiền trên UI
             view.updateInventoryList(itemList)
             view.updateTotalMoney(totalMoney)
         }
@@ -89,38 +93,69 @@ class ChooseDishPresenter(
         }
 
         scope.launch {
-            val refID = UUID.randomUUID().toString()
             val invoiceDetails = selectedItems.mapIndexed { index, item ->
-                val quantity = item.quantity.toFloat() // convert Int -> Float
-                val price = (item.Price ?: 0f)
+                val quantity = item.quantity.toFloat()
+                val price = item.Price ?: 0f
                 val amount = quantity * price
 
                 SAInvoiceDetail(
-                    RefDetailID = UUID.randomUUID().toString(),  // đúng tên trường (dù có lỗi chính tả)
+                    RefDetailID = UUID.randomUUID().toString(),
                     RefDetailType = 1,
                     RefID = refID,
                     InventoryItemID = item.InventoryItemID,
                     InventoryItemName = item.InventoryItemName ?: "",
                     UnitID = item.UnitID ?: "",
-                    UnitName = "", // bạn chưa có dữ liệu UnitName, để trống hoặc lấy nếu có
+                    UnitName = "",
                     Quantity = quantity,
                     UnitPrice = price,
                     Amount = amount,
-                    Description = "", // để trống nếu chưa có
+                    Description = "",
                     SortOrder = index + 1,
                     CreatedDate = System.currentTimeMillis(),
-                    CreatedBy = "", // để trống hoặc lấy user hiện tại
+                    CreatedBy = "",
                     ModifiedDate = null,
                     ModifiedBy = ""
                 )
             }
-            view.navigateToInvoice(invoiceDetails)
 
+            // Lưu chi tiết hóa đơn vào database
+            invoiceDetailRepo.insertDetails(invoiceDetails)
+
+            view.showMessage("Đã lưu hóa đơn thành công!")
         }
-
-
-        }
-
     }
 
+    override fun onSaveClick() {
+        // Gọi lại xử lý lưu khi bấm nút Lưu
+        onCollectMoneyClick()
+    }
 
+    override fun getSelectedInvoiceItems(): List<SAInvoiceItem> {
+        return getSelectedItems().map {
+            SAInvoiceItem(
+                refId = refID,
+                refType = 1,
+                refNo = "HD001",
+                refDate = System.currentTimeMillis(),
+                amount = (it.Price ?: 0f).toDouble() * it.quantity,
+                returnAmount = 0.0,
+                receiveAmount = (it.Price ?: 0f).toDouble() * it.quantity,
+                remainAmount = 0.0,
+                journalMemo = "",
+                paymentStatus = 0,
+                numberOfPeople = 0,
+                tableName = "",
+                listItemName = it.InventoryItemName ?: "",
+                createdDate = System.currentTimeMillis(),
+                createdBy = "",
+                modifiedDate = null,
+                modifiedBy = null,
+                quantity = it.quantity
+            )
+        }
+    }
+
+    override fun getRefId(): String {
+        return refID
+    }
+}

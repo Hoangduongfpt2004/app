@@ -62,7 +62,7 @@ class SAInvoiceDetailRepository(private val context: Context) {
         return db.update(
             "SAInvoiceDetail",
             detailToContentValues(detail),
-            "RefDetaillD = ?",
+            "RefDetailID = ?",
             arrayOf(detail.RefDetailID)
         )
     }
@@ -70,9 +70,9 @@ class SAInvoiceDetailRepository(private val context: Context) {
     // Helper: convert Cursor to SAInvoiceDetail
     private fun cursorToDetail(cursor: android.database.Cursor): SAInvoiceDetail {
         return SAInvoiceDetail(
-            RefDetailID = cursor.getString(cursor.getColumnIndexOrThrow("RefDetaillD")),
+            RefDetailID = cursor.getString(cursor.getColumnIndexOrThrow("RefDetailID")),
             RefDetailType = cursor.getInt(cursor.getColumnIndexOrThrow("RefDetailType")),
-            RefID = cursor.getString(cursor.getColumnIndexOrThrow("RefD")),
+            RefID = cursor.getString(cursor.getColumnIndexOrThrow("RefID")),
             InventoryItemID = cursor.getString(cursor.getColumnIndexOrThrow("InventoryItemID")),
             InventoryItemName = cursor.getString(cursor.getColumnIndexOrThrow("InventoryItemName")),
             UnitID = cursor.getString(cursor.getColumnIndexOrThrow("UnitID")),
@@ -92,9 +92,9 @@ class SAInvoiceDetailRepository(private val context: Context) {
     // Helper: convert SAInvoiceDetail to ContentValues
     private fun detailToContentValues(detail: SAInvoiceDetail): ContentValues {
         return ContentValues().apply {
-            put("RefDetaillD", detail.RefDetailID)
+            put("RefDetailID", detail.RefDetailID)
             put("RefDetailType", detail.RefDetailType)
-            put("RefD", detail.RefID)
+            put("RefID", detail.RefID)
             put("InventoryItemID", detail.InventoryItemID)
             put("InventoryItemName", detail.InventoryItemName)
             put("UnitID", detail.UnitID)
@@ -111,7 +111,7 @@ class SAInvoiceDetailRepository(private val context: Context) {
         }
     }
 
-    // Extension để tránh crash khi cột Long nullable
+    // Extension function to safely get nullable Long
     private fun android.database.Cursor.getLongOrNull(columnName: String): Long? {
         val index = getColumnIndex(columnName)
         return if (index != -1 && !isNull(index)) getLong(index) else null

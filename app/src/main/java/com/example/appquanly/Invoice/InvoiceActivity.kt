@@ -10,8 +10,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.appquanly.R
-import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
+import com.example.appquanly.data.sqlite.Local.SAInvoiceDetailRepository
 
 class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
 
@@ -21,10 +21,12 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     private lateinit var tvTienTraLai: TextView
     private lateinit var tvTongTien: TextView
     private lateinit var tableLayout: TableLayout
+    private lateinit var tvSoBan: TextView
 
     private var totalAmount = 0.0
 
-    // Giả sử bạn có Presenter
+    private lateinit var invoiceDetailRepo: SAInvoiceDetailRepository
+
     private lateinit var presenter: InvoiceContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,18 +39,30 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         tvTienTraLai = findViewById(R.id.tvTienTraLai)
         tvTongTien = findViewById(R.id.tvTongTien)
         tableLayout = findViewById(R.id.tableLayout)
+        tvSoBan = findViewById(R.id.tvSoBan)
 
-        // Khởi tạo Presenter nếu có
-        // presenter = InvoicePresenter(this)
+        invoiceDetailRepo = SAInvoiceDetailRepository(this)
 
-        // Lấy dữ liệu danh sách hóa đơn từ Intent (giả sử là SAInvoiceDetail)
+        tvSoBan.text = "Bàn: ${intent.getStringExtra("tableName") ?: "--"}"
+
         val invoiceDetails = intent.getParcelableArrayListExtra<SAInvoiceDetail>("invoice_details") ?: emptyList()
 
-        // Lấy mã hóa đơn
-        val refID = intent.getStringExtra("refID") ?: ""
+        val refID = intent.getStringExtra("refId") ?: ""
 
         showInvoiceInfo(refID, java.text.SimpleDateFormat("dd/MM/yyyy HH:mm").format(System.currentTimeMillis()))
+
         displayInvoiceDetails(invoiceDetails)
+
+        // Chạy lưu dữ liệu trong background thread
+        Thread {
+            if (invoiceDetails.isNotEmpty()) {
+                // Gọi đúng phương thức insertDetails với dữ liệu
+                invoiceDetailRepo.insertDetails(invoiceDetails)
+                runOnUiThread {
+                    showToast("Lưu hóa đơn thành công!")
+                }
+            }
+        }.start()
 
         tvTienKhachDua.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -65,13 +79,22 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         tableLayout.removeAllViews()
         totalAmount = 0.0
 
+        val headerRow = TableRow(this)
+        listOf("Tên món", "SL", "Đơn giá", "Thành tiền").forEach {
+            headerRow.addView(TextView(this).apply {
+                text = it
+                setPadding(16, 8, 16, 8)
+            })
+        }
+        tableLayout.addView(headerRow)
+
         details.forEach { detail ->
             val row = TableRow(this)
 
             val tvName = TextView(this).apply { text = detail.InventoryItemName }
-            val tvQuantity = TextView(this).apply { text = detail.Quantity.toInt().toString() }
-            val tvUnitPrice = TextView(this).apply { text = detail.UnitPrice.toInt().toString() }
-            val tvAmount = TextView(this).apply { text = detail.Amount.toInt().toString() }
+            val tvQuantity = TextView(this).apply { text = detail.Quantity.toString() }
+            val tvUnitPrice = TextView(this).apply { text = String.format("%.0f", detail.UnitPrice) }
+            val tvAmount = TextView(this).apply { text = String.format("%.0f", detail.Amount) }
 
             row.addView(tvName)
             row.addView(tvQuantity)
@@ -80,14 +103,14 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
 
             tableLayout.addView(row)
 
-            totalAmount += detail.Amount.toDouble()
+            totalAmount += detail.Amount
         }
 
         showTotalAmount(totalAmount)
     }
 
-    override fun showInvoiceData(items: List<InventoryItem>) {
-        // Bạn có thể xử lý nếu dùng InventoryItem thay vì SAInvoiceDetail
+    override fun showInvoiceData(items: List<com.example.appquanly.data.sqlite.Entity.InventoryItem>) {
+        // Xử lý khi cần dùng InventoryItem
     }
 
     override fun showTotalAmount(amount: Double) {
@@ -103,7 +126,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     }
 
     override fun showInvoiceInfo(refNo: String, date: String) {
-        tvSoHoaDon.text = "Hóa đơn: $refNo"
+        tvSoHoaDon.text = "Số hóa đơn: $refNo"
         tvNgay.text = "Ngày: $date"
     }
 

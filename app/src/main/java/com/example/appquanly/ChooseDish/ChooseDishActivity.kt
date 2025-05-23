@@ -2,22 +2,20 @@ package com.example.appquanly.ChooseDish.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.appquanly.CashRegister.CalculatorDialogFragment
-import com.example.appquanly.ChooseDish.contract.ChooseDishContract
-import com.example.appquanly.ChooseDish.presenter.ChooseDishPresenter
-import com.example.appquanly.Invoice.InvoiceActivity
 import com.example.appquanly.R
 import com.example.appquanly.SalePutIn.SaleeActivity
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
-import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
+import com.example.appquanly.ChooseDish.contract.ChooseDishContract
+import com.example.appquanly.ChooseDish.presenter.ChooseDishPresenter
+import com.example.appquanly.CashRegister.CalculatorDialogFragment
+import com.example.appquanly.Invoice.InvoiceActivity
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 
 class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
@@ -68,7 +66,11 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
                 openCalculatorForQuantity(item, position)
             }
+
+
         })
+
+
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -96,10 +98,14 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             finish()
         }
 
+        // Nút Cất dữ liệu và chuyển sang SaleeActivity
         edit_store.setOnClickListener {
+            val selectedItems = presenter.getSelectedInvoiceItems() // lấy dữ liệu từ Presenter
             val intent = Intent(this, SaleeActivity::class.java)
+            intent.putExtra("invoice_items", ArrayList(selectedItems)) // truyền ArrayList<SAInvoiceItem>
             startActivity(intent)
         }
+
 
         presenter.loadItemsFromDB()
     }
@@ -145,12 +151,17 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
     }
 
     override fun navigateToInvoice(selectedDetails: List<SAInvoiceDetail>) {
-        val intent = Intent(this, InvoiceActivity::class.java)
-        intent.putParcelableArrayListExtra("invoice_details", ArrayList(selectedDetails))
-        startActivity(intent)
-        finish()
+        // Viết code xử lý ở đây
+        // Ví dụ: chuyển sang màn hình hóa đơn (InvoiceActivity) kèm dữ liệu
     }
 
+    override fun openInvoiceScreen(refId: String) {
+        val intent = Intent(this, InvoiceActivity::class.java)
+        intent.putExtra("EXTRA_REF_ID", refId)
+        startActivity(intent)
+    }
 
     override fun getContext() = this
+
 }
+

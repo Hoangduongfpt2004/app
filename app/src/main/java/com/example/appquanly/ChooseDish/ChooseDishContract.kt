@@ -3,6 +3,7 @@ package com.example.appquanly.ChooseDish.contract
 import android.content.Context
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 
 interface ChooseDishContract {
 
@@ -13,6 +14,9 @@ interface ChooseDishContract {
         fun showMessage(message: String)
         fun openCalculator()
         fun getContext(): Context
+        fun openInvoiceScreen(refId: String)
+
+
     }
 
     interface Presenter {
@@ -25,5 +29,13 @@ interface ChooseDishContract {
         fun onIncreaseItem(item: InventoryItem)
         fun onDecreaseItem(item: InventoryItem)
         fun updateQuantityForItem(item: InventoryItem, quantity: Int)
+        fun getSelectedInvoiceItems(): List<SAInvoiceItem>
+        fun onSaveClick()
+        fun getRefId(): String
+        fun goToInvoiceScreen(refId: String)
+
+
+
+
     }
 }
