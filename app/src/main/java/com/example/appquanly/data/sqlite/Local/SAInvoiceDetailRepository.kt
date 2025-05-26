@@ -16,27 +16,33 @@ class SAInvoiceDetailRepository(private val context: Context) {
                 list.add(cursorToDetail(cursor))
             } while (cursor.moveToNext())
         }
+
         cursor.close()
+        db.close()
         return list
     }
 
     fun getDetailsByRefID(refID: String): List<SAInvoiceDetail> {
         val list = mutableListOf<SAInvoiceDetail>()
         val db = DatabaseCopyHelper(context).readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail WHERE RefD = ?", arrayOf(refID))
+        val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail WHERE RefID = ?", arrayOf(refID))
 
         if (cursor.moveToFirst()) {
             do {
                 list.add(cursorToDetail(cursor))
             } while (cursor.moveToNext())
         }
+
         cursor.close()
+        db.close()
         return list
     }
 
     fun insertDetail(detail: SAInvoiceDetail): Long {
         val db = DatabaseCopyHelper(context).writableDatabase
-        return db.insert("SAInvoiceDetail", null, detailToContentValues(detail))
+        val result = db.insert("SAInvoiceDetail", null, detailToContentValues(detail))
+        db.close()
+        return result
     }
 
     fun insertDetails(details: List<SAInvoiceDetail>) {
@@ -49,25 +55,29 @@ class SAInvoiceDetailRepository(private val context: Context) {
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
+            db.close()
         }
     }
 
     fun deleteByRefID(refID: String): Int {
         val db = DatabaseCopyHelper(context).writableDatabase
-        return db.delete("SAInvoiceDetail", "RefD = ?", arrayOf(refID))
+        val result = db.delete("SAInvoiceDetail", "RefID = ?", arrayOf(refID))
+        db.close()
+        return result
     }
 
     fun updateDetail(detail: SAInvoiceDetail): Int {
         val db = DatabaseCopyHelper(context).writableDatabase
-        return db.update(
+        val result = db.update(
             "SAInvoiceDetail",
             detailToContentValues(detail),
             "RefDetailID = ?",
             arrayOf(detail.RefDetailID)
         )
+        db.close()
+        return result
     }
 
-    // Helper: convert Cursor to SAInvoiceDetail
     private fun cursorToDetail(cursor: android.database.Cursor): SAInvoiceDetail {
         return SAInvoiceDetail(
             RefDetailID = cursor.getString(cursor.getColumnIndexOrThrow("RefDetailID")),
@@ -89,7 +99,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
         )
     }
 
-    // Helper: convert SAInvoiceDetail to ContentValues
     private fun detailToContentValues(detail: SAInvoiceDetail): ContentValues {
         return ContentValues().apply {
             put("RefDetailID", detail.RefDetailID)
@@ -111,9 +120,16 @@ class SAInvoiceDetailRepository(private val context: Context) {
         }
     }
 
-    // Extension function to safely get nullable Long
+    // Extension function to get nullable Long from cursor
     private fun android.database.Cursor.getLongOrNull(columnName: String): Long? {
         val index = getColumnIndex(columnName)
         return if (index != -1 && !isNull(index)) getLong(index) else null
     }
+
+    // Mới thêm hàm lấy chi tiết hóa đơn mới nhất
+//    fun getDetailsOfLatestInvoice(): List<SAInvoiceDetail> {
+//        val invoiceRepo = SAInvoiceRepository(context)
+//        val latestInvoice = invoiceRepo.getLatestInvoice() ?: return emptyList()
+//        return getDetailsByRefID(latestInvoice.refId)
+//    }
 }

@@ -174,7 +174,7 @@
                 <ImageView
                     android:id="@+id/btnIcon"
                     android:background="@drawable/circle_red"
-                    android:src="@drawable/ic_default"
+                    android:src="@drawable/baseline_question_mark_24"
                     android:contentDescription="Biểu tượng"
                     style="@style/Image_hoicham" />
 

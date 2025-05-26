@@ -45,4 +45,9 @@
     <color name="beige_base">#F5F5DC</color>
     <color name="mint_base">#98FF98</color>
     <color name="peach_base">#FFDAB9</color>
+
+    <color name="colorCircleLow">#4CAF50</color> <!-- xanh lá nhạt -->
+    <color name="colorCircleMedium">#FFC107</color> <!-- vàng cam -->
+    <color name="colorCircleHigh">#F44336</color> <!-- đỏ -->
+
 </resources>

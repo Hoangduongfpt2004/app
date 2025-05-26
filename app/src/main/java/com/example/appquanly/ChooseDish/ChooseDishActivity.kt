@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
 import com.example.appquanly.SalePutIn.SaleeActivity
-import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
 import com.example.appquanly.ChooseDish.contract.ChooseDishContract
@@ -100,9 +99,32 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
         // Nút Cất dữ liệu và chuyển sang SaleeActivity
         edit_store.setOnClickListener {
-            val selectedItems = presenter.getSelectedInvoiceItems() // lấy dữ liệu từ Presenter
+            val selectedDetails = presenter.getSelectedInvoiceDetails() // List<SAInvoiceDetail>
+            val soBan = btnSetting.text.toString()
+            val soKhach = btnAvatar.text.toString()
+            val tongTien = tvTotalMoney.text.toString()
+
             val intent = Intent(this, SaleeActivity::class.java)
-            intent.putExtra("invoice_items", ArrayList(selectedItems)) // truyền ArrayList<SAInvoiceItem>
+            intent.putParcelableArrayListExtra("invoice_details", ArrayList(selectedDetails))
+            intent.putExtra("so_ban", soBan)
+            intent.putExtra("so_khach", soKhach)
+            intent.putExtra("tong_tien", tongTien)
+            startActivity(intent)
+        }
+
+
+
+
+        btnCollectMoney.setOnClickListener {
+            val selectedDetails: List<SAInvoiceDetail> = presenter.getSelectedInvoiceDetails()
+            val intent = Intent(this, InvoiceActivity::class.java)
+            intent.putParcelableArrayListExtra("EXTRA_INVOICE_DETAILS", ArrayList(selectedDetails))
+            // Lấy giá trị số bàn
+            val soBan = findViewById<TextView>(R.id.seting).text.toString()
+            intent.putExtra("EXTRA_SO_BAN", soBan)
+            startActivity(intent)
+
+
             startActivity(intent)
         }
 

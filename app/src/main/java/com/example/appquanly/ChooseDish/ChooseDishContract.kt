@@ -17,6 +17,7 @@ interface ChooseDishContract {
         fun openInvoiceScreen(refId: String)
 
 
+
     }
 
     interface Presenter {
@@ -33,6 +34,9 @@ interface ChooseDishContract {
         fun onSaveClick()
         fun getRefId(): String
         fun goToInvoiceScreen(refId: String)
+        fun getSelectedInvoiceDetails(): List<SAInvoiceDetail>
+
+
 
 
 

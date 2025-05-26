@@ -66,8 +66,6 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
 
 
 
-
-
         // Biến lưu trạng thái sửa món
         var isEdit = false
         var editingDishId: String? = null
@@ -154,10 +152,6 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         val formatter = NumberFormat.getNumberInstance(Locale("vi", "VN"))
         return formatter.format(value)
     }
-
-
-
-
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

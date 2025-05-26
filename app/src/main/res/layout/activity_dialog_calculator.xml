@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layoutRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <!-- Hiển thị số tiền đã nhập -->
+    <TextView
+        android:id="@+id/tvAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="32sp"
+        android:gravity="end"
+        android:textColor="@android:color/black"
+        android:paddingBottom="12dp" />
+
+    <!-- Bàn phím -->
+    <GridLayout
+        android:id="@+id/gridKeyboard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4"
+        android:rowCount="4"
+        android:useDefaultMargins="true"
+        android:alignmentMode="alignMargins"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Gợi ý -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GỢI Ý TIỀN MẶT"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:paddingBottom="8dp" />
+
+    <!-- Nút gợi ý -->
+    <GridLayout
+        android:id="@+id/gridSuggestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:alignmentMode="alignMargins"
+        android:layout_marginBottom="8dp"
+        android:padding="0dp"
+        android:clipToPadding="false" />
+
+
+    <!-- Nút XONG (ẩn nếu không dùng) -->
+    <Button
+        android:id="@+id/btnAccept"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ĐỒNG Ý"
+        android:visibility="gone" />
+</LinearLayout>

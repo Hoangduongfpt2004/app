@@ -30,10 +30,10 @@ class ChooseDishPresenter(
             view.updateTotalMoney(totalMoney)
         }
     }
+
     override fun goToInvoiceScreen(refId: String) {
         view.openInvoiceScreen(refId)
     }
-
 
     override fun onBackClick() {
         // Xử lý khi bấm nút Back nếu cần
@@ -105,7 +105,7 @@ class ChooseDishPresenter(
                     InventoryItemID = item.InventoryItemID,
                     InventoryItemName = item.InventoryItemName ?: "",
                     UnitID = item.UnitID ?: "",
-                    UnitName = "",
+                    UnitName = "", // Nếu cần, bạn có thể lấy từ bảng Unit
                     Quantity = quantity,
                     UnitPrice = price,
                     Amount = amount,
@@ -118,28 +118,26 @@ class ChooseDishPresenter(
                 )
             }
 
-            // Lưu chi tiết hóa đơn vào database
             invoiceDetailRepo.insertDetails(invoiceDetails)
-
             view.showMessage("Đã lưu hóa đơn thành công!")
         }
     }
 
     override fun onSaveClick() {
-        // Gọi lại xử lý lưu khi bấm nút Lưu
         onCollectMoneyClick()
     }
 
     override fun getSelectedInvoiceItems(): List<SAInvoiceItem> {
         return getSelectedItems().map {
+            val amount = (it.Price ?: 0f).toDouble() * it.quantity
             SAInvoiceItem(
                 refId = refID,
                 refType = 1,
                 refNo = "HD001",
                 refDate = System.currentTimeMillis(),
-                amount = (it.Price ?: 0f).toDouble() * it.quantity,
+                amount = amount,
                 returnAmount = 0.0,
-                receiveAmount = (it.Price ?: 0f).toDouble() * it.quantity,
+                receiveAmount = amount,
                 remainAmount = 0.0,
                 journalMemo = "",
                 paymentStatus = 0,
@@ -158,4 +156,32 @@ class ChooseDishPresenter(
     override fun getRefId(): String {
         return refID
     }
+    override fun getSelectedInvoiceDetails(): List<SAInvoiceDetail> {
+        return getSelectedItems().mapIndexed { index, item ->
+            val quantity = item.quantity.toFloat()
+            val price = item.Price ?: 0f
+            val amount = quantity * price
+
+            SAInvoiceDetail(
+                RefDetailID = UUID.randomUUID().toString(),
+                RefDetailType = 1,
+                RefID = refID,
+                InventoryItemID = item.InventoryItemID,
+                InventoryItemName = item.InventoryItemName ?: "",
+                UnitID = item.UnitID ?: "",
+                UnitName = "", // Lấy từ bảng đơn vị nếu cần
+                Quantity = quantity,
+                UnitPrice = price,
+                Amount = amount,
+                Description = "",
+                SortOrder = index + 1,
+                CreatedDate = System.currentTimeMillis(),
+                CreatedBy = "",
+                ModifiedDate = null,
+                ModifiedBy = ""
+            )
+        }
+    }
+
+
 }
