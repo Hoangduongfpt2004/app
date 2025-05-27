@@ -1,14 +1,12 @@
 package com.example.appquanly.SalePutIn
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Local.SAInvoiceDetailRepository
 import com.example.appquanly.data.sqlite.Local.SAInvoiceRepository
-import java.util.UUID
 
 class SaleeActivity : AppCompatActivity() {
 
@@ -19,7 +17,7 @@ class SaleeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_salee)
+        setContentView(R.layout.activity_sale)
 
         recyclerView = findViewById(R.id.rvProducts)
         recyclerView.layoutManager = LinearLayoutManager(this)

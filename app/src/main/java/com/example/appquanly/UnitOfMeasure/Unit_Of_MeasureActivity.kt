@@ -1,12 +1,14 @@
 package com.example.appquanly.UnitOfMeasure
 
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,12 +22,18 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
 
     private lateinit var presenter: Unit_Of_MeasureContract.Presenter
     private lateinit var adapter: Unit_Of_MeasureAdapter
+    private var selectedUnitName: String? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_unit_of_measure)
 
         presenter = Unit_Of_MeasurePresenter(this, UnitRepository(this))
+
+        // Nhận đơn vị đã chọn từ Intent hoặc từ SharedPreferences (nếu cần)
+        selectedUnitName = intent.getStringExtra("SELECTED_UNIT_NAME")
+            ?: getSharedPreferences("AppPrefs", Context.MODE_PRIVATE).getString("LAST_SELECTED_UNIT", null)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { finish() }
@@ -39,6 +47,13 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewDonVi)
         adapter = Unit_Of_MeasureAdapter(
             onItemClick = { selectedUnit ->
+                presenter.selectItem(selectedUnit)
+
+                // Lưu đơn vị vừa chọn vào SharedPreferences để giữ lại trạng thái
+                val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putString("LAST_SELECTED_UNIT", selectedUnit.UnitName).apply()
+
+                // Trả kết quả về màn hình trước
                 val resultIntent = Intent().apply {
                     putExtra("SELECTED_UNIT", selectedUnit.UnitName)
                 }
@@ -50,38 +65,21 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
-        // Thêm dòng kẻ ngang (divider) cho RecyclerView
-        val dividerItemDecoration = DividerItemDecoration(
-            recyclerView.context,
-            DividerItemDecoration.VERTICAL
-        )
-        // Nếu muốn dùng drawable custom, tạo file res/drawable/divider_line.xml rồi uncomment đoạn dưới:
-        /*
-        val dividerDrawable = ContextCompat.getDrawable(this, R.drawable.divider_line)
-        if (dividerDrawable != null) {
-            dividerItemDecoration.setDrawable(dividerDrawable)
-        }
-        */
-        recyclerView.addItemDecoration(dividerItemDecoration)
-
-        findViewById<Button>(R.id.btnDone).setOnClickListener {
-            finish()
-        }
+        findViewById<Button>(R.id.btnDone).setOnClickListener { finish() }
 
         presenter.loadData()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showAddDialog() {
         val dialogView = layoutInflater.inflate(R.layout.activiti_dialog_edit_unit, null)
-
         val editText = dialogView.findViewById<EditText>(R.id.edtUnitName)
         val btnAdd = dialogView.findViewById<Button>(R.id.btnSave)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
 
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
+        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
 
         btnAdd.setOnClickListener {
             val donViTinh = editText.text.toString()
@@ -91,25 +89,20 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
             }
         }
 
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
+        btnCancel.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun showEditDialog(unit: UnitOfMeasure) {
         val dialogView = layoutInflater.inflate(R.layout.activiti_dialog_edit_unit, null)
-
         val editText = dialogView.findViewById<EditText>(R.id.edtUnitName)
         val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
 
         editText.setText(unit.UnitName)
 
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
+        val dialog = AlertDialog.Builder(this).setView(dialogView).create()
 
         btnSave.setOnClickListener {
             val newName = editText.text.toString()
@@ -123,18 +116,24 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
             }
         }
 
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
+        btnCancel.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
     override fun showList(units: List<UnitOfMeasure>) {
-        adapter.setItems(units)
+        // Đánh dấu đơn vị đang được chọn để hiển thị dấu tích
+        val updatedList = units.map {
+            it.Inactive = it.UnitName == selectedUnitName
+            it
+        }
+        adapter.setItems(updatedList)
     }
 
     override fun updateList() {
         adapter.notifyDataSetChanged()
+    }
+
+    override fun addItemToList(unit: UnitOfMeasure) {
+        adapter.addItem(unit)
     }
 }

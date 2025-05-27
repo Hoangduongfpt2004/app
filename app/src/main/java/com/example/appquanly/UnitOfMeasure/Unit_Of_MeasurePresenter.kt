@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import com.example.appquanly.data.sqlite.Entity.UnitOfMeasure
 import com.example.appquanly.data.sqlite.Local.UnitRepository
 import java.time.LocalDateTime
+import java.util.UUID
 
 class Unit_Of_MeasurePresenter(
     private val view: Unit_Of_MeasureContract.View,
@@ -15,9 +16,8 @@ class Unit_Of_MeasurePresenter(
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun loadData() {
-        val list = repository.getAllUnit()
         units.clear()
-        units.addAll(list)
+        units.addAll(repository.getAllUnit())
         view.showList(units)
     }
 
@@ -25,7 +25,7 @@ class Unit_Of_MeasurePresenter(
     override fun addDonViTinh(name: String) {
         val now = LocalDateTime.now()
         val newUnit = UnitOfMeasure(
-            UnitID = java.util.UUID.randomUUID().toString(), // tạo id ngẫu nhiên
+            UnitID = UUID.randomUUID().toString(),
             UnitName = name,
             Description = "",
             Inactive = false,
@@ -36,7 +36,7 @@ class Unit_Of_MeasurePresenter(
         )
         repository.addDonViTinh(newUnit)
         units.add(newUnit)
-        view.updateList()
+        view.addItemToList(newUnit)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -48,8 +48,7 @@ class Unit_Of_MeasurePresenter(
     }
 
     override fun selectItem(selectedUnit: UnitOfMeasure) {
-        units.forEach { it.isSelected = (it.UnitID == selectedUnit.UnitID) }
+        units.forEach { it.Inactive = (it.UnitID == selectedUnit.UnitID) }
         view.updateList()
     }
 }
-

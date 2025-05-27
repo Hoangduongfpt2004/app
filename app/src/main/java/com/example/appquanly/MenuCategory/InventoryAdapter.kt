@@ -41,10 +41,13 @@ class InventoryAdapter(
         val item = itemList[position]
 
         holder.textViewName.text = item.InventoryItemName ?: "No Name"
-        holder.textViewPrice.text = item.Price?.let { "Giá tiền: ${formatCurrencyVND(it)}" } ?: "No Price"
+        holder.textViewPrice.text = item.Price?.let {
+            "Giá tiền: ${formatCurrencyVND(it * 1)}"
+        } ?: "Giá tiền: 0 "
 
+
+        // Trạng thái ẩn/hiện
         val inactive = item.Inactive == true
-
         if (inactive) {
             holder.tvTrangThai.visibility = View.VISIBLE
             holder.textViewName.setTextColor(Color.GRAY)
@@ -55,6 +58,7 @@ class InventoryAdapter(
             holder.textViewPrice.setTextColor(Color.BLACK)
         }
 
+        // Gán màu nếu có
         item.Color?.let { colorStr ->
             try {
                 holder.imageViewIcon.backgroundTintList = ColorStateList.valueOf(Color.parseColor(colorStr))
@@ -62,9 +66,10 @@ class InventoryAdapter(
                 holder.imageViewIcon.backgroundTintList = ColorStateList.valueOf(Color.LTGRAY)
             }
         } ?: run {
-            holder.imageViewIcon.backgroundTintList = null
+            holder.imageViewIcon.backgroundTintList = ColorStateList.valueOf(Color.LTGRAY)
         }
 
+        // Gán icon nếu có
         if (!item.IconFileName.isNullOrEmpty()) {
             val assetPath = "icondefault/${item.IconFileName}"
             try {
@@ -80,6 +85,7 @@ class InventoryAdapter(
             holder.imageViewIcon.setImageResource(R.drawable.ic_default)
         }
 
+        // Sự kiện click => gửi item đúng và giữ nguyên icon/màu về để sửa
         holder.itemView.setOnClickListener {
             onItemClick(item)
         }

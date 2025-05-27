@@ -6,63 +6,84 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".SalesSreen.Sale_SreenActivity">
+    tools:context=".SalePutIn.SaleeActivity">
 
     <!-- Nội dung chính -->
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <!-- Toolbar -->
-        <com.google.android.material.appbar.MaterialToolbar
+        <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary_color"
+            android:layout_height="56dp"
+            android:background="#0076D7"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:title="Bán hàng"
-            app:menu="@menu/menu_banhang"
-            app:titleCentered="true"
-            app:titleTextColor="@android:color/white" />
+            app:titleTextColor="@android:color/white"
+            app:navigationIcon="@drawable/baseline_menu_24" />
 
-        <!-- Mũi tên chỉ vào nút "+" -->
-
-        <!-- Layout chính -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <!-- Nội dung chính bên dưới toolbar -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="?attr/actionBarSize">
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-            <!-- Ảnh nằm dưới -->
-            <ImageView
-                android:id="@+id/imgEmpty"
-                style="@style/Image.Empty"
-                android:contentDescription="@string/app_name"
-                tools:ignore="MissingConstraints" />
+            <!-- View khi chưa có dữ liệu -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layoutEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#DCD9D9">
 
-            <!-- TextView: "Chưa có khách gọi món" -->
-            <TextView
-                android:id="@+id/tvNoOrders"
-                android:text="Chưa có khách gọi món"
-                style="@style/App_Text.NoOrders"
-                tools:ignore="MissingConstraints" />
+                <!-- Ảnh nằm dưới -->
+                <ImageView
+                    android:id="@+id/imgEmpty"
+                    style="@style/Image.Empty"
+                    android:contentDescription="@string/app_name"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/tvNoOrders"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- TextView: Hint -->
-            <TextView
-                android:id="@+id/tvHint"
-                style="@style/App_Text.Hint"
-                android:text="Bấm vào đây hoặc dấu + để chọn món"
-                app:layout_constraintTop_toBottomOf="@id/tvNoOrders"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                <!-- TextView: "Chưa có khách gọi món" -->
+                <TextView
+                    android:id="@+id/tvNoOrders"
+                    android:text="Chưa có khách gọi món"
+                    style="@style/App_Text.NoOrders"
+                    app:layout_constraintTop_toBottomOf="@id/imgEmpty"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Mũi tên nằm góc phải trên cùng -->
-            <ImageView
-                android:id="@+id/imgArrow"
-                style="@style/imgArrow"
-                tools:ignore="MissingConstraints" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <!-- TextView: Hint -->
+                <TextView
+                    android:id="@+id/tvHint"
+                    style="@style/App_Text.Hint"
+                    android:text="Bấm vào đây hoặc dấu + để chọn món"
+                    app:layout_constraintTop_toBottomOf="@id/tvNoOrders"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+                <!-- Mũi tên nằm góc phải trên cùng -->
+                <ImageView
+                    android:id="@+id/imgArrow"
+                    style="@style/imgArrow"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- RecyclerView danh sách sản phẩm -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvProducts"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:background="@color/blue_grey_base"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
 
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView

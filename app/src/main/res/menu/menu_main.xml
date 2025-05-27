@@ -17,7 +17,8 @@
     <!-- Nhóm 1: THIẾT LẬP -->
     <item
         android:id="@+id/menu_Thiet_Lap"
-        android:title="THIẾT LẬP">
+        android:title="THIẾT LẬP"
+        android:enabled="false">
         <menu>
             <item
                 android:id="@+id/dong_bo_du_lieu"
@@ -37,7 +38,8 @@
     <!-- Nhóm 2: TRỢ GIÚP -->
     <item
         android:id="@+id/menu_tro_giup"
-        android:title="TRỢ GIÚP">
+        android:title="TRỢ GIÚP"
+        android:enabled="false">
         <menu>
             <item
                 android:id="@+id/thong_bao"
@@ -68,7 +70,8 @@
     <!-- Nhóm 4: TÀI KHOẢN -->
     <item
         android:id="@+id/menu_tai_khoan"
-        android:title="Tài Khoản">
+        android:title="Tài Khoản"
+        android:enabled="false">
         <menu>
             <item
                 android:id="@+id/dat_mat_khau"

@@ -5,7 +5,7 @@ import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
 import java.util.UUID
 
-class ThemMonPresenter(private val view: Add_DishContract.View) : Add_DishContract.Presenter {
+class Add_DishPersenter(private val view: Add_DishContract.View) : Add_DishContract.Presenter {
 
     private val repository = InventoryItemRepository(view as Context)
 

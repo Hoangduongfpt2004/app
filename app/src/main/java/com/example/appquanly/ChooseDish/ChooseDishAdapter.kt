@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import java.io.IOException
+import java.text.NumberFormat
+import java.util.Locale
 
 class ChooseDishAdapter(
     private val list: MutableList<InventoryItem>,
@@ -25,8 +27,6 @@ class ChooseDishAdapter(
         fun onQuantityClick(item: InventoryItem, position: Int)
     }
 
-    private val expandedPositions = mutableSetOf<Int>()
-
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvTenMon)
         val tvPrice: TextView = itemView.findViewById(R.id.tvGia)
@@ -35,6 +35,7 @@ class ChooseDishAdapter(
         val btnIncrease: ImageView = itemView.findViewById(R.id.btnIncrease)
         val btnDecrease: ImageView = itemView.findViewById(R.id.btnDecrease)
         val layoutQuantity: LinearLayout = itemView.findViewById(R.id.layoutQuantity)
+        val ivTick: ImageView = itemView.findViewById(R.id.ivTick) // icon tick trong item
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -44,16 +45,17 @@ class ChooseDishAdapter(
     }
 
     override fun getItemCount() = list.size
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[position]
         val context = holder.itemView.context
 
-        holder.tvName.text = item.InventoryItemName  ?: "Tên món trống"
+        holder.tvName.text = item.InventoryItemName ?: "Tên món trống"
 
-        val priceFormatted = item.Price?.toInt()?.let {
-            String.format("%,d đ", it)
+        val priceFormatted = item.Price?.let {
+            val format = NumberFormat.getNumberInstance(Locale("vi", "VN"))
+            format.format(it) + " đ"
         } ?: "0 đ"
+
         holder.tvPrice.text = priceFormatted
 
         item.IconFileName?.let { iconName ->
@@ -79,51 +81,76 @@ class ChooseDishAdapter(
             holder.ivIcon.backgroundTintList = null
         }
 
-        // Lấy số lượng (quantity) từ InventoryItem, mặc định 0 nếu null
         val currentQuantity = item.quantity ?: 0
-        holder.tvQuantity.text = currentQuantity.toString()
+        val isTicked = item.isTicked ?: false
 
-        // Hiển thị layout quantity nếu item đang mở rộng
-        holder.layoutQuantity.visibility = if (expandedPositions.contains(position)) View.VISIBLE else View.GONE
-
-        // Nút tăng số lượng
-        holder.btnIncrease.setOnClickListener {
-            listener.onIncrease(item)
-        }
-
-        // Nút giảm số lượng
-        holder.btnDecrease.setOnClickListener {
-            listener.onDecrease(item)
-        }
-
-        // Click vào số lượng để mở giao diện nhập thủ công hoặc xử lý khác
-        holder.tvQuantity.setOnClickListener {
-            listener.onQuantityClick(item, position)
-        }
-
-        // Click vào toàn bộ item để mở/thu gọn phần quantity
-        holder.itemView.setOnClickListener {
-            if (expandedPositions.contains(position)) {
-                expandedPositions.remove(position)
+        if (isTicked) {
+            // Nếu đã tick: ẩn nút tăng giảm, ẩn số lượng, chỉ hiện tick
+            holder.layoutQuantity.visibility = View.GONE
+            holder.ivTick.visibility = View.VISIBLE
+        } else {
+            // Chưa tick
+            if (currentQuantity > 0) {
+                holder.layoutQuantity.visibility = View.VISIBLE
+                holder.tvQuantity.text = currentQuantity.toString()
+                holder.ivTick.visibility = View.VISIBLE
             } else {
-                expandedPositions.add(position)
+                holder.layoutQuantity.visibility = View.GONE
+                holder.tvQuantity.text = ""
+                holder.ivTick.visibility = View.GONE // Ẩn dấu tích luôn nếu quantity = 0 và chưa tick
+            }
+        }
+
+        // Bấm vào dấu tick 1 lần là reset và ẩn dấu tích luôn
+        holder.ivTick.setOnClickListener {
+            if (isTicked) {
+                // Bỏ tick: reset số lượng về 0 và ẩn tick
+                item.isTicked = false
+                item.quantity = 0
+            } else {
+                // Tick: ẩn nút tăng giảm, giữ nguyên quantity nếu cần
+                item.isTicked = true
             }
             notifyItemChanged(position)
         }
+
+        if (!isTicked) {
+
+            holder.btnIncrease.setOnClickListener {
+                listener.onIncrease(item)
+            }
+
+            holder.btnDecrease.setOnClickListener {
+                listener.onDecrease(item)
+            }
+
+            holder.tvQuantity.setOnClickListener {
+                listener.onQuantityClick(item, position)
+            }
+
+
+            holder.itemView.setOnClickListener {
+                listener.onIncrease(item)
+            }
+
+        } else {
+
+            holder.btnIncrease.setOnClickListener(null)
+            holder.btnDecrease.setOnClickListener(null)
+            holder.tvQuantity.setOnClickListener(null)
+            holder.itemView.setOnClickListener(null)
+        }
     }
 
-    // Cập nhật toàn bộ danh sách và refresh adapter
     fun updateData(newList: List<InventoryItem>) {
         list.clear()
         list.addAll(newList)
         notifyDataSetChanged()
     }
 
-    // Cập nhật số lượng cho 1 item tại vị trí và refresh item đó
     fun updateQuantityAt(position: Int, quantity: Int) {
         if (position in list.indices) {
-            val item = list[position]
-            item.quantity = quantity
+            list[position].quantity = quantity
             notifyItemChanged(position)
         }
     }

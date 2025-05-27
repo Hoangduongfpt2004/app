@@ -24,12 +24,14 @@
                 android:background="@drawable/circle_background"
                 android:scaleType="centerCrop" />
 
+
+
             <ImageView
-                android:id="@+id/imgTick"
+                android:id="@+id/ivTick"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_selected"
-                android:background="#80000000"
+                android:background="#80A29E9E"
                 android:scaleType="center"
                 android:visibility="gone" />
         </FrameLayout>

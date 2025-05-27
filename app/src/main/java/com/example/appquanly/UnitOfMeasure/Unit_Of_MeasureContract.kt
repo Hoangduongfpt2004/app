@@ -6,6 +6,7 @@ interface Unit_Of_MeasureContract {
     interface View {
         fun showList(units: List<UnitOfMeasure>)
         fun updateList()
+        fun addItemToList(unit: UnitOfMeasure)
     }
 
     interface Presenter {

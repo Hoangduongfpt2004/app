@@ -19,6 +19,7 @@ data class InventoryItem(
     var Color: String?,
     var IconFileName: String?,
     var UseCount: Int,
-    var quantity: Int = 0
+    var quantity: Int = 0,
+    var isTicked: Boolean? = false
 ) : Parcelable
 

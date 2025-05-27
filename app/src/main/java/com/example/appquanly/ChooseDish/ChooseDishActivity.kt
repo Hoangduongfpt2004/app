@@ -1,5 +1,6 @@
 package com.example.appquanly.ChooseDish.view
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
@@ -9,12 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
 import com.example.appquanly.SalePutIn.SaleeActivity
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
-import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.ChooseDish.contract.ChooseDishContract
 import com.example.appquanly.ChooseDish.presenter.ChooseDishPresenter
 import com.example.appquanly.CashRegister.CalculatorDialogFragment
 import com.example.appquanly.Invoice.InvoiceActivity
-import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
+import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
+import java.util.Locale
 
 class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
@@ -52,11 +54,20 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
         recyclerView = findViewById(R.id.rvMonAn)
         adapter = ChooseDishAdapter(mutableListOf(), object : ChooseDishAdapter.OnDishActionListener {
             override fun onIncrease(item: InventoryItem) {
-                presenter.onIncreaseItem(item)
+                val newQuantity = (item.quantity ?: 0) + 1
+                item.quantity = newQuantity
+                presenter.updateQuantityForItem(item, newQuantity)
+                adapter.notifyDataSetChanged()
             }
 
             override fun onDecrease(item: InventoryItem) {
-                presenter.onDecreaseItem(item)
+                val current = item.quantity ?: 0
+                if (current > 0) {
+                    val newQuantity = current - 1
+                    item.quantity = newQuantity
+                    presenter.updateQuantityForItem(item, newQuantity)
+                    adapter.notifyDataSetChanged()
+                }
             }
 
             override fun onQuantityClick(item: InventoryItem, position: Int) {
@@ -65,10 +76,7 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
                 openCalculatorForQuantity(item, position)
             }
-
-
         })
-
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -97,7 +105,6 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             finish()
         }
 
-        // Nút Cất dữ liệu và chuyển sang SaleeActivity
         edit_store.setOnClickListener {
             val selectedDetails = presenter.getSelectedInvoiceDetails() // List<SAInvoiceDetail>
             val soBan = btnSetting.text.toString()
@@ -112,22 +119,14 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             startActivity(intent)
         }
 
-
-
-
         btnCollectMoney.setOnClickListener {
             val selectedDetails: List<SAInvoiceDetail> = presenter.getSelectedInvoiceDetails()
             val intent = Intent(this, InvoiceActivity::class.java)
             intent.putParcelableArrayListExtra("EXTRA_INVOICE_DETAILS", ArrayList(selectedDetails))
-            // Lấy giá trị số bàn
             val soBan = findViewById<TextView>(R.id.seting).text.toString()
             intent.putExtra("EXTRA_SO_BAN", soBan)
             startActivity(intent)
-
-
-            startActivity(intent)
         }
-
 
         presenter.loadItemsFromDB()
     }
@@ -160,30 +159,31 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             val quantity = result.toIntOrNull()
             if (quantity != null && quantity >= 0) {
                 adapter.updateQuantityAt(position, quantity)
+                item.quantity = quantity
                 presenter.updateQuantityForItem(item, quantity)
             } else {
-                showMessage("Giá trị nhập không hợp lệ!")
+                showMessage("Vui lòng nhập số hợp lệ")
             }
         }
         calculatorDialog.show(supportFragmentManager, "CalculatorDialog")
     }
 
     override fun updateTotalMoney(total: Double) {
-        tvTotalMoney.text = total.toString()
+        val formattedTotal = String.format(Locale("vi", "VN"), "%,.0f đ", total)
+        tvTotalMoney.text = formattedTotal
     }
 
     override fun navigateToInvoice(selectedDetails: List<SAInvoiceDetail>) {
-        // Viết code xử lý ở đây
-        // Ví dụ: chuyển sang màn hình hóa đơn (InvoiceActivity) kèm dữ liệu
-    }
-
-    override fun openInvoiceScreen(refId: String) {
         val intent = Intent(this, InvoiceActivity::class.java)
-        intent.putExtra("EXTRA_REF_ID", refId)
+        intent.putParcelableArrayListExtra("EXTRA_INVOICE_DETAILS", ArrayList(selectedDetails))
         startActivity(intent)
     }
 
-    override fun getContext() = this
+    override fun getContext(): Context {
+        return this
+    }
 
+    override fun openInvoiceScreen(refId: String) {
+        // Tạm để trống hoặc bổ sung khi cần
+    }
 }
-

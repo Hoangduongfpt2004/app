@@ -123,7 +123,9 @@
                 style="@style/Don_vi_Tinh_Gia"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:text="Bao" />
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:scrollHorizontally="true" />
 
             <ImageView
                 android:layout_width="wrap_content"

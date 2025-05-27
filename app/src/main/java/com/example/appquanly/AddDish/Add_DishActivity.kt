@@ -1,5 +1,6 @@
 package com.example.appquanly.AddDish
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -11,6 +12,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.ParseException
 import com.example.appquanly.R
 import com.example.appquanly.UnitOfMeasure.Unit_Of_MeasureActivity
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
@@ -37,18 +39,15 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
     private lateinit var btnDelete: Button
     private lateinit var checkboxInactive: CheckBox
     private lateinit var layoutNgungBan: LinearLayout
+    private var selectedUnitName: String? = null
 
 
-
-    companion object {
-        private const val REQUEST_UNIT = 100
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_dish)
 
-        presenter = ThemMonPresenter(this)
+        presenter = Add_DishPersenter(this)
 
         // Ánh xạ view
         btnColor = findViewById(R.id.btn_color)
@@ -59,16 +58,21 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         tvSave = findViewById(R.id.tvSave)
         btnSave = findViewById(R.id.btnSave)
         edtItemName = findViewById(R.id.edtItemName)
-        tvTitle = findViewById(R.id.tvTitle) // Thêm dòng này nếu chưa có
-        btnDelete = findViewById(R.id.btnDelete) // Thêm dòng này nếu chưa có
+        tvTitle = findViewById(R.id.tvTitle)
+        btnDelete = findViewById(R.id.btnDelete)
         layoutNgungBan = findViewById(R.id.layoutNgungBan)
         checkboxInactive = findViewById(R.id.checkboxInactive)
-
-
 
         // Biến lưu trạng thái sửa món
         var isEdit = false
         var editingDishId: String? = null
+
+        // Lấy đơn vị tính đã chọn từ SharedPreferences để giữ trạng thái
+        val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        var selectedUnitName = sharedPreferences.getString("LAST_SELECTED_UNIT", "bao") // "bao" mặc định nếu chưa chọn
+
+        // Hiển thị đơn vị tính lên TextView
+        tvUnit.text = selectedUnitName
 
         // Kiểm tra intent để biết là sửa món hay thêm mới
         isEdit = intent.getBooleanExtra("isEdit", false)
@@ -110,9 +114,10 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         // Back button
         ivBack.setOnClickListener { finish() }
 
-        // Chọn đơn vị tính
+        // Chọn đơn vị tính: mở Unit_Of_MeasureActivity và truyền đơn vị hiện tại
         tvUnit.setOnClickListener {
             val intent = Intent(this, Unit_Of_MeasureActivity::class.java)
+            intent.putExtra("SELECTED_UNIT_NAME", selectedUnitName) // truyền đơn vị hiện tại để chọn mặc định
             startActivityForResult(intent, REQUEST_UNIT)
         }
 
@@ -124,17 +129,16 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
             }
         }
 
-
-
         // Nút lưu (có thể 2 nút)
         val saveClickListener = {
             val itemName = edtItemName.text.toString().trim()
             val unit = tvUnit.text.toString().trim()
             val color = if (selectedColor != Color.WHITE) String.format("#%06X", 0xFFFFFF and selectedColor) else null
             val isInactive = checkboxInactive.isChecked
-            val priceText = tvPrice.text.toString().replace(",", "")
-            val price = priceText.toFloatOrNull()
 
+            val priceTextRaw = tvPrice.text.toString().trim()
+            val priceClean = priceTextRaw.replace(".", "")
+            val price = priceClean.toFloatOrNull() ?: 0f
 
             if (isEdit && editingDishId != null) {
                 presenter.updateInventoryItem(editingDishId!!, itemName, price, unit, color, selectedIconName, isInactive)
@@ -142,27 +146,41 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
                 presenter.addInventoryItem(itemName, price, unit, color, selectedIconName, isInactive)
             }
 
-        }
 
+        }
         tvSave.setOnClickListener { saveClickListener() }
         btnSave.setOnClickListener { saveClickListener() }
     }
 
-    private fun formatPrice(value: Double): String {
-        val formatter = NumberFormat.getNumberInstance(Locale("vi", "VN"))
-        return formatter.format(value)
+    private fun formatPrice(price: Float): String {
+        val format = NumberFormat.getInstance(Locale("vi", "VN"))
+        format.minimumFractionDigits = 0
+        format.maximumFractionDigits = 0
+        return format.format(price)
     }
 
 
+    // Bổ sung override onActivityResult để nhận đơn vị tính mới từ Unit_Of_MeasureActivity
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_UNIT && resultCode == RESULT_OK) {
-            val selectedUnit = data?.getStringExtra("SELECTED_UNIT")
-            if (!selectedUnit.isNullOrEmpty()) {
-                tvUnit.text = selectedUnit
+            val newUnit = data?.getStringExtra("SELECTED_UNIT")
+            if (!newUnit.isNullOrEmpty()) {
+                tvUnit.text = newUnit
+
+                // Lưu đơn vị mới vào SharedPreferences để giữ trạng thái cho lần sau
+                val sharedPreferences = getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().putString("LAST_SELECTED_UNIT", newUnit).apply()
             }
         }
     }
+
+    // Định nghĩa hằng số request code
+    companion object {
+        private const val REQUEST_UNIT = 1001
+    }
+
+
 
     // Hiện máy tính để nhập giá
     private fun showCalculatorDialog() {
@@ -172,102 +190,134 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         val btnDone = dialogView.findViewById<Button>(R.id.btnDone)
 
         var currentInput = ""
-        var previousInput = ""
+        var previousValue = 0.0
         var operator = ""
         var isInOperation = false
 
-        fun formatNumberDisplay(value: String): String {
-            val number = value.toDoubleOrNull() ?: return "0.0"
-            return if (number % 1 == 0.0) number.toInt().toString() else number.toString()
+        fun formatDisplayNumber(value: Double): String {
+            val nf = NumberFormat.getInstance(Locale("vi", "VN"))
+            nf.maximumFractionDigits = 0
+            nf.minimumFractionDigits = 0
+            return nf.format(value)
         }
 
         fun updateDisplay() {
-            val displayText = when {
-                isInOperation && previousInput.isNotEmpty() && currentInput.isEmpty() -> "${formatNumberDisplay(previousInput)} $operator"
-                previousInput.isNotEmpty() && currentInput.isNotEmpty() && operator.isNotEmpty() -> "${formatNumberDisplay(previousInput)} $operator ${formatNumberDisplay(currentInput)}"
-                else -> formatNumberDisplay(currentInput)
+            if (currentInput.isNotEmpty()) {
+                val inputValue = currentInput.toDoubleOrNull() ?: 0.0
+                if (isInOperation) {
+                    val prevFormatted = formatDisplayNumber(previousValue)
+                    val currFormatted = formatDisplayNumber(inputValue)
+                    edtDisplay.setText("$prevFormatted $operator $currFormatted")
+                } else {
+                    edtDisplay.setText(formatDisplayNumber(inputValue))
+                }
+            } else {
+                edtDisplay.setText("0")
             }
-            edtDisplay.setText(displayText)
+            edtDisplay.setSelection(edtDisplay.text.length)
         }
+
+        fun clearInput() {
+            currentInput = ""
+            previousValue = 0.0
+            operator = ""
+            isInOperation = false
+            btnDone.text = "Xong"
+            updateDisplay()
+        }
+
+        fun appendDigit(digit: String) {
+            if (digit in "0123456789") {
+                currentInput += digit
+                updateDisplay()
+            }
+        }
+
+        fun increaseByThousand() {
+            val currentVal = currentInput.toDoubleOrNull() ?: 0.0
+            val newVal = currentVal + 1000
+            currentInput = newVal.toLong().toString()
+            updateDisplay()
+        }
+
+        fun decreaseByThousand() {
+            val currentVal = currentInput.toDoubleOrNull() ?: 0.0
+            val newVal = (currentVal - 1000).coerceAtLeast(0.0)
+            currentInput = newVal.toLong().toString()
+            updateDisplay()
+        }
+
+        fun performOperation() {
+            val currentVal = currentInput.toDoubleOrNull() ?: 0.0
+            val result = when (operator) {
+                "+" -> previousValue + currentVal
+                "-" -> previousValue - currentVal
+                "x", "*" -> previousValue * currentVal
+                "/" -> if (currentVal != 0.0) previousValue / currentVal else 0.0
+                else -> currentVal
+            }
+            currentInput = result.toLong().toString()
+            previousValue = 0.0
+            operator = ""
+            isInOperation = false
+            btnDone.text = "Xong"
+            updateDisplay()
+        }
+
+        clearInput()
 
         for (i in 0 until gridButtons.childCount) {
             val button = gridButtons.getChildAt(i) as Button
             button.setOnClickListener {
                 val label = button.text.toString()
-
                 when (label) {
-                    "C" -> {
-                        currentInput = ""
-                        previousInput = ""
-                        operator = ""
-                        isInOperation = false
-                        btnDone.text = "Xong"
-                        updateDisplay()
-                    }
-                    "Giảm" -> {
-                        val value = currentInput.toDoubleOrNull() ?: 0.0
-                        currentInput = ((value - 1000).coerceAtLeast(0.0)).toInt().toString()
-                        updateDisplay()
-                    }
-                    "Tăng" -> {
-                        val value = currentInput.toDoubleOrNull() ?: 0.0
-                        currentInput = (value + 1000).toInt().toString()
-                        updateDisplay()
-                    }
-                    "," -> {
-                        if (!currentInput.contains(".")) currentInput += "."
-                        updateDisplay()
-                    }
+                    "C" -> clearInput()
+                    "Giảm" -> decreaseByThousand()
+                    "Tăng" -> increaseByThousand()
                     "+", "-", "x", "/" -> {
-                        if (currentInput.isNotEmpty()) {
-                            previousInput = currentInput
+                        if (!isInOperation) {
+                            previousValue = currentInput.toDoubleOrNull() ?: 0.0
                             currentInput = ""
-                            operator = if (label == "x") "*" else label
+                            operator = label
                             isInOperation = true
                             btnDone.text = "="
                             updateDisplay()
                         }
                     }
+                    "=" -> performOperation()
                     else -> {
-                        if (label == "0" && currentInput == "0") return@setOnClickListener
-                        currentInput += label
-                        updateDisplay()
+                        if (label == "000") {
+                            currentInput += "000"
+                            updateDisplay()
+                        } else {
+                            appendDigit(label)
+                        }
                     }
+
                 }
             }
         }
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
 
         btnDone.setOnClickListener {
             if (btnDone.text == "=") {
-                if (previousInput.isNotEmpty() && currentInput.isNotEmpty()) {
-                    val result = when (operator) {
-                        "+" -> previousInput.toDouble() + currentInput.toDouble()
-                        "-" -> previousInput.toDouble() - currentInput.toDouble()
-                        "*" -> previousInput.toDouble() * currentInput.toDouble()
-                        "/" -> if (currentInput.toDouble() != 0.0) previousInput.toDouble() / currentInput.toDouble() else 0.0
-                        else -> 0.0
-                    }
-                    currentInput = result.toString()
-                    previousInput = ""
-                    operator = ""
-                    isInOperation = false
-                    btnDone.text = "Xong"
-                    tvPrice.text = formatPrice(currentInput.toDouble())
-                }
+                performOperation()
             } else {
-                if (currentInput.isNotEmpty()) tvPrice.text = formatPrice(currentInput.toDouble())
-                alertDialog.dismiss()
+                val finalPrice = currentInput.toDoubleOrNull() ?: 0.0
+                tvPrice.text = formatDisplayNumber(finalPrice)
+                dialog.dismiss()
             }
         }
 
-
-        alertDialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-            .create()
-
-        alertDialog.show()
+        dialog.show()
     }
+
+
+
+
 
     private fun applySelectedColorForIconBackground(color: Int) {
         btnColor.backgroundTintList = ColorStateList.valueOf(color)
@@ -343,10 +393,37 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
         layoutNgungBan.visibility = View.VISIBLE
 
         edtItemName.setText(item.InventoryItemName)
-        tvPrice.text = item.Price?.let { formatPrice(it.toDouble()) } ?: ""
+        tvPrice.text = item.Price?.let { formatPrice(it) } ?: ""
         tvUnit.text = item.UnitID
         checkboxInactive.isChecked = item.Inactive == true
+
+        // Giữ nguyên icon cũ khi sửa món
+        selectedIconName = item.IconFileName  // giả sử item có trường IconName lưu tên icon (chuỗi)
+        if (selectedIconName != null) {
+            try {
+                val inputStream = assets.open("icondefault/$selectedIconName")
+                val drawable = Drawable.createFromStream(inputStream, null)
+                selectedIcon = drawable
+                btnIcon.setImageDrawable(drawable)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
+        // Giữ nguyên màu cũ khi sửa món
+        val colorString = item.Color  // giả sử item có trường Color lưu string "#RRGGBB"
+        if (!colorString.isNullOrEmpty()) {
+            try {
+                selectedColor = Color.parseColor(colorString)
+                applySelectedColorForIconBackground(selectedColor)
+            } catch (e: IllegalArgumentException) {
+                // Nếu màu sai định dạng thì dùng mặc định
+                selectedColor = Color.WHITE
+            }
+        }
     }
+
+
 
 
 

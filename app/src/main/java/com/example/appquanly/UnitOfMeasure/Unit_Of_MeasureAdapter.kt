@@ -22,18 +22,15 @@ class Unit_Of_MeasureAdapter(
         notifyDataSetChanged()
     }
 
-    fun getItems(): List<UnitOfMeasure> = items
-
-    fun getSelectedItem(): UnitOfMeasure? {
-        return items.find { it.Inactive } // Inactive = true nghĩa là được chọn
+    fun addItem(unit: UnitOfMeasure) {
+        items.add(unit)
+        notifyItemInserted(items.size - 1)
     }
 
     fun updateItem(updated: UnitOfMeasure) {
         val index = items.indexOfFirst { it.UnitID == updated.UnitID }
         if (index != -1) {
-            items[index].UnitName = updated.UnitName
-            items[index].ModifiedDate = updated.ModifiedDate
-            items[index].ModifiedBy = updated.ModifiedBy
+            items[index] = updated
             notifyItemChanged(index)
         }
     }
@@ -51,13 +48,13 @@ class Unit_Of_MeasureAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = items[position]
-
         holder.txtName.text = item.UnitName
         holder.iconCheck.visibility = if (item.Inactive) View.VISIBLE else View.INVISIBLE
 
         holder.itemView.setOnClickListener {
-            // Bỏ chọn tất cả và chọn item hiện tại
+            // Bỏ chọn tất cả
             items.forEach { it.Inactive = false }
+            // Chọn item này
             item.Inactive = true
             notifyDataSetChanged()
             onItemClick(item)
