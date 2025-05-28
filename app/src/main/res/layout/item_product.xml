@@ -85,7 +85,7 @@
 
             <!-- Tên món -->
             <TextView
-                android:id="@+id/tvName"
+                android:id="@+id/tvTableName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Tên Món"
@@ -94,7 +94,7 @@
 
             <!-- Giá tiền -->
             <TextView
-                android:id="@+id/tvPrice"
+                android:id="@+id/tvTotalAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"

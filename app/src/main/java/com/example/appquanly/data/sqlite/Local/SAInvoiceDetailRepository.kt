@@ -2,7 +2,10 @@ package com.example.appquanly.data.sqlite.Local
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
+import android.util.Log
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
+import java.util.UUID
 
 class SAInvoiceDetailRepository(private val context: Context) {
 
@@ -10,13 +13,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
         val list = mutableListOf<SAInvoiceDetail>()
         val db = DatabaseCopyHelper(context).readableDatabase
         val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail", null)
-
         if (cursor.moveToFirst()) {
             do {
                 list.add(cursorToDetail(cursor))
             } while (cursor.moveToNext())
         }
-
         cursor.close()
         db.close()
         return list
@@ -26,13 +27,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
         val list = mutableListOf<SAInvoiceDetail>()
         val db = DatabaseCopyHelper(context).readableDatabase
         val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail WHERE RefID = ?", arrayOf(refID))
-
         if (cursor.moveToFirst()) {
             do {
                 list.add(cursorToDetail(cursor))
             } while (cursor.moveToNext())
         }
-
         cursor.close()
         db.close()
         return list
@@ -40,7 +39,12 @@ class SAInvoiceDetailRepository(private val context: Context) {
 
     fun insertDetail(detail: SAInvoiceDetail): Long {
         val db = DatabaseCopyHelper(context).writableDatabase
-        val result = db.insert("SAInvoiceDetail", null, detailToContentValues(detail))
+        // ⚠️ Đảm bảo RefDetailID không bị trùng
+        val detailWithUniqueID = detail.copy(
+            RefDetailID = UUID.randomUUID().toString()
+        )
+        Log.d("InsertDetail", "Inserting RefDetailID = ${detailWithUniqueID.RefDetailID}")
+        val result = db.insert("SAInvoiceDetail", null, detailToContentValues(detailWithUniqueID))
         db.close()
         return result
     }
@@ -50,7 +54,12 @@ class SAInvoiceDetailRepository(private val context: Context) {
         db.beginTransaction()
         try {
             for (detail in details) {
-                db.insert("SAInvoiceDetail", null, detailToContentValues(detail))
+                // ⚠️ Luôn tạo mới RefDetailID cho từng detail
+                val detailWithID = detail.copy(
+                    RefDetailID = UUID.randomUUID().toString()
+                )
+                Log.d("InsertDetail", "Bulk insert RefDetailID = ${detailWithID.RefDetailID}")
+                db.insert("SAInvoiceDetail", null, detailToContentValues(detailWithID))
             }
             db.setTransactionSuccessful()
         } finally {
@@ -78,7 +87,7 @@ class SAInvoiceDetailRepository(private val context: Context) {
         return result
     }
 
-    private fun cursorToDetail(cursor: android.database.Cursor): SAInvoiceDetail {
+    private fun cursorToDetail(cursor: Cursor): SAInvoiceDetail {
         return SAInvoiceDetail(
             RefDetailID = cursor.getString(cursor.getColumnIndexOrThrow("RefDetailID")),
             RefDetailType = cursor.getInt(cursor.getColumnIndexOrThrow("RefDetailType")),
@@ -120,16 +129,9 @@ class SAInvoiceDetailRepository(private val context: Context) {
         }
     }
 
-    // Extension function to get nullable Long from cursor
-    private fun android.database.Cursor.getLongOrNull(columnName: String): Long? {
+    // Extension function để lấy Long? từ Cursor một cách an toàn
+    private fun Cursor.getLongOrNull(columnName: String): Long? {
         val index = getColumnIndex(columnName)
         return if (index != -1 && !isNull(index)) getLong(index) else null
     }
-
-    // Mới thêm hàm lấy chi tiết hóa đơn mới nhất
-//    fun getDetailsOfLatestInvoice(): List<SAInvoiceDetail> {
-//        val invoiceRepo = SAInvoiceRepository(context)
-//        val latestInvoice = invoiceRepo.getLatestInvoice() ?: return emptyList()
-//        return getDetailsByRefID(latestInvoice.refId)
-//    }
 }

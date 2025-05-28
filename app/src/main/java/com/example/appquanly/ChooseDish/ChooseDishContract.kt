@@ -15,10 +15,7 @@ interface ChooseDishContract {
         fun openCalculator()
         fun getContext(): Context
         fun openInvoiceScreen(refId: String)
-
-
-
-
+        fun navigateToSaleeScreen(invoiceItems: List<SAInvoiceItem>)
 
 
     }
@@ -38,11 +35,10 @@ interface ChooseDishContract {
         fun getRefId(): String
         fun goToInvoiceScreen(refId: String)
         fun getSelectedInvoiceDetails(): List<SAInvoiceDetail>
-
-
-
-
-
+        fun submitInvoiceToSaleeActivity(tableName: String, numberOfPeople: Int)
+        fun onInvoiceSavedSuccess()
+        fun onInvoiceSavedFailed(error: String)
 
     }
-}
+ }
+

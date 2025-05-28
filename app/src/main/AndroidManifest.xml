@@ -95,9 +95,9 @@
         <activity android:name=".ForgotPassword.ForgotPasswordActivity" />
         <activity android:name=".SelectDishActivity.SelectDishActivity">
 
-            <!-- Các thông tin cấu hình khác của Activity nếu cần -->
+
         </activity>
-        <activity android:name=".SalesSreen.Sale_SreenActivity" />
+
     </application>
 
 </manifest>

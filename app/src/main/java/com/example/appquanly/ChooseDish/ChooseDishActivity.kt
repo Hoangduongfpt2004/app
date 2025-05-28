@@ -8,14 +8,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
-import com.example.appquanly.SalePutIn.SaleeActivity
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.ChooseDish.contract.ChooseDishContract
 import com.example.appquanly.ChooseDish.presenter.ChooseDishPresenter
 import com.example.appquanly.CashRegister.CalculatorDialogFragment
 import com.example.appquanly.Invoice.InvoiceActivity
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
+import com.example.appquanly.salee.SaleeActivity
 import java.util.Locale
 
 class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
@@ -106,18 +107,28 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
         }
 
         edit_store.setOnClickListener {
-            val selectedDetails = presenter.getSelectedInvoiceDetails() // List<SAInvoiceDetail>
+            val selectedDetails = presenter.getSelectedInvoiceDetails()
             val soBan = btnSetting.text.toString()
             val soKhach = btnAvatar.text.toString()
             val tongTien = tvTotalMoney.text.toString()
 
+            // Tạo danh sách SAInvoiceItem từ SAInvoiceDetail
+            val invoiceItems = presenter.convertToInvoiceItems(selectedDetails)
+
+            // Lưu vào database nếu cần
+            presenter.saveInvoice(soBan, soKhach, tongTien, selectedDetails)
+
+            // Truyền cả invoiceItems và invoiceDetails sang SaleeActivity
             val intent = Intent(this, SaleeActivity::class.java)
-            intent.putParcelableArrayListExtra("invoice_details", ArrayList(selectedDetails))
             intent.putExtra("so_ban", soBan)
             intent.putExtra("so_khach", soKhach)
             intent.putExtra("tong_tien", tongTien)
+            intent.putExtra("invoiceItems", ArrayList(invoiceItems))
+            intent.putParcelableArrayListExtra("invoice_details", ArrayList(selectedDetails))
             startActivity(intent)
         }
+
+
 
         btnCollectMoney.setOnClickListener {
             val selectedDetails: List<SAInvoiceDetail> = presenter.getSelectedInvoiceDetails()
@@ -130,6 +141,7 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
         presenter.loadItemsFromDB()
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -186,4 +198,17 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
     override fun openInvoiceScreen(refId: String) {
         // Tạm để trống hoặc bổ sung khi cần
     }
+
+
+
+    override fun navigateToSaleeScreen(invoiceItems: List<SAInvoiceItem>) {
+        val intent = Intent(this, SaleeActivity::class.java)
+        val bundle = Bundle()
+        bundle.putSerializable("invoiceItems", ArrayList(invoiceItems)) // SAInvoiceItem phải implement Serializable
+        intent.putExtras(bundle)
+        startActivity(intent)
+    }
+
+
+
 }

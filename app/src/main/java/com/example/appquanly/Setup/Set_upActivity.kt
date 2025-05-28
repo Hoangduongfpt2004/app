@@ -3,27 +3,25 @@ package com.example.appquanly.Setup
 import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
-import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.example.appquanly.R
+import com.example.appquanly.SalePutIn.BaseDrawerActivity
 import com.example.appquanly.Setup.contract.Set_upContract
 import com.example.appquanly.Setup.presenter.Set_upPresenter
 
-class Set_upActivity : AppCompatActivity(), Set_upContract.View {
+class Set_upActivity : BaseDrawerActivity(), Set_upContract.View {
 
     private lateinit var presenter: Set_upContract.Presenter
     private lateinit var layoutRestoreData: LinearLayout
-    private lateinit var tvRestoreDescription: TextView  // 👈 thêm dòng này
+    private lateinit var tvRestoreDescription: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_establish)
 
         presenter = Set_upPresenter(this)
 
@@ -51,6 +49,15 @@ class Set_upActivity : AppCompatActivity(), Set_upContract.View {
         }
     }
 
+    override fun getLayoutId(): Int {
+        return R.layout.activity_establish  // Trả về layout của màn hình này
+    }
+
+    override fun getNavigationMenuItemId(): Int {
+
+        return R.id.thiet_lap
+    }
+
     override fun showRestoreDataDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Xác nhận lấy lại toàn bộ dữ liệu")
@@ -66,7 +73,7 @@ class Set_upActivity : AppCompatActivity(), Set_upContract.View {
                 ForegroundColorSpan(Color.RED),
                 start,
                 end,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
 

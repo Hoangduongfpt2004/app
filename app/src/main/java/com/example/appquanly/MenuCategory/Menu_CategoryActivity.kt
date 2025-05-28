@@ -5,24 +5,18 @@ import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.AddDish.Add_DishActivity
 import com.example.appquanly.R
+import com.example.appquanly.SalePutIn.BaseDrawerActivity
 import com.example.appquanly.data.sqlite.Entity.InventoryItem
 import com.example.appquanly.data.sqlite.Local.InventoryItemRepository
-import com.google.android.material.navigation.NavigationView
 
-class Menu_CategoryActivity : AppCompatActivity(), Menu_CategoryContract.View {
+class Menu_CategoryActivity : BaseDrawerActivity(), Menu_CategoryContract.View {
 
-    private lateinit var drawerLayout: DrawerLayout
-    private lateinit var navigationView: NavigationView
-    private lateinit var toolbar: androidx.appcompat.widget.Toolbar
     private lateinit var btnAdd: ImageButton
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: InventoryAdapter
@@ -35,26 +29,25 @@ class Menu_CategoryActivity : AppCompatActivity(), Menu_CategoryContract.View {
         }
     }
 
+    override fun getLayoutId(): Int {
+        return R.layout.activity_thuc_don
+    }
+
+    override fun getNavigationMenuItemId(): Int {
+        return R.id.thuc_don  // ID menu tương ứng trong NavigationView XML
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_thuc_don)
 
-        drawerLayout = findViewById(R.id.drawerLayout)
-        navigationView = findViewById(R.id.navigationView)
-        toolbar = findViewById(R.id.toolbar)
         btnAdd = findViewById(R.id.btnAdd)
         recyclerView = findViewById(R.id.rvProducts)
 
         presenter = Menu_CategoryPresenter(this, InventoryItemRepository(this))
 
-        setSupportActionBar(toolbar)
-        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close)
-        drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
-
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        // ✅ Thêm dòng kẻ chia item (divider)
+        // Thêm divider giữa các item
         val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
         ContextCompat.getDrawable(this, R.drawable.divider)?.let {
             divider.setDrawable(it)

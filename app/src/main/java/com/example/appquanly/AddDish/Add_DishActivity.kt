@@ -82,13 +82,13 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
                 presenter.loadInventoryItemById(it) // Yêu cầu presenter load dữ liệu món lên view
             }
 
-            // 👉 Đổi tiêu đề
+            //  Đổi tiêu đề
             tvTitle.text = "Sửa món"
 
-            // 👉 Hiện nút Xóa
+            //  Hiện nút Xóa
             btnDelete.visibility = View.VISIBLE
 
-            // 👉 Xử lý sự kiện Xóa
+            //  Xử lý sự kiện Xóa
             btnDelete.setOnClickListener {
                 editingDishId?.let { id ->
                     presenter.deleteInventoryItem(id)
@@ -317,8 +317,6 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
 
 
 
-
-
     private fun applySelectedColorForIconBackground(color: Int) {
         btnColor.backgroundTintList = ColorStateList.valueOf(color)
         btnIcon.backgroundTintList = ColorStateList.valueOf(color)
@@ -422,9 +420,6 @@ class Add_DishActivity : AppCompatActivity(), Add_DishContract.View {
             }
         }
     }
-
-
-
 
 
     private fun showIconPickerDialog() {
