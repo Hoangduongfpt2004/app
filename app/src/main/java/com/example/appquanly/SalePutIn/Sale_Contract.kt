@@ -1,5 +1,7 @@
 package com.example.appquanly.salee
 
+import com.example.appquanly.SalePutIn.InvoiceWithDetails
+
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 
@@ -11,7 +13,7 @@ interface SaleeContract {
         fun showMenu()
         fun navigateTo(screen: MenuScreen)
         fun onMenuItemClicked(itemId: Int)
-        fun showInvoiceItems(items: List<SAInvoiceItem>)
+        fun showInvoiceItems(items: List<InvoiceWithDetails>)
         fun showMessage(message: String)
     }
 
@@ -21,6 +23,7 @@ interface SaleeContract {
         fun onMenuItemClicked(itemId: Int)
         fun loadInvoiceItems()
         fun saveInvoiceItem(item: SAInvoiceItem)
+
         fun saveInvoiceFull(
             soBan: String,
             soKhach: String,

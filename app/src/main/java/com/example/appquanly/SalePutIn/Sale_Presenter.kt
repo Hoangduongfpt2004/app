@@ -2,6 +2,7 @@ package com.example.appquanly.salee
 
 import android.content.Context
 import com.example.appquanly.R
+import com.example.appquanly.SalePutIn.InvoiceWithDetails
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 import com.example.appquanly.data.sqlite.Local.SAInvoiceDetailRepository
@@ -9,6 +10,7 @@ import com.example.appquanly.data.sqlite.Local.SAInvoiceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class SaleePresenter(
@@ -48,17 +50,30 @@ class SaleePresenter(
     }
 
     override fun loadInvoiceItems() {
-        val items = invoiceRepo.getAllInvoices()
-        if (items.isEmpty()) {
-            view.showNoOrders()
-        } else {
-            view.showInvoiceItems(items)
+        scopeMain.launch {
+            val invoices = withContext(Dispatchers.IO) { invoiceRepo.getAllInvoices() }
+            if (invoices.isEmpty()) {
+                view.showNoOrders()
+                return@launch
+            }
+
+            // Lấy chi tiết cho từng hóa đơn
+            val invoicesWithDetails = withContext(Dispatchers.IO) {
+                invoices.map { invoice ->
+                    val details = invoiceDetailRepo.getDetailsByRefID(invoice.refId)
+                    InvoiceWithDetails(invoice, details)
+                }
+            }
+
+            view.showInvoiceItems(invoicesWithDetails)
         }
     }
 
     override fun saveInvoiceItem(item: SAInvoiceItem) {
-        invoiceRepo.insertInvoice(item)
-        loadInvoiceItems()
+        scopeMain.launch {
+            invoiceRepo.insertInvoice(item)
+            loadInvoiceItems()
+        }
     }
 
     override fun saveInvoiceFull(
@@ -77,7 +92,7 @@ class SaleePresenter(
             val mainInvoice = SAInvoiceItem(
                 refId = refId,
                 refType = 1,
-                refNo = "HD001",
+                refNo = "HD001", // Có thể sinh số hóa đơn tùy ý
                 refDate = refDate,
                 amount = amount,
                 returnAmount = 0.0,
@@ -98,6 +113,7 @@ class SaleePresenter(
             invoiceDetails.forEach { invoiceDetailRepo.insertDetail(it.copy(RefID = refId)) }
 
             view.showMessage("Lưu hóa đơn thành công!")
+            loadInvoiceItems()
         }
     }
 
@@ -107,38 +123,36 @@ class SaleePresenter(
         tongTien: String,
         details: List<SAInvoiceDetail>
     ) {
-        scopeIO.launch {
+        scopeMain.launch {
             val refId = UUID.randomUUID().toString()
+            val refDate = System.currentTimeMillis()
             val amount = tongTien.toDoubleOrNull() ?: 0.0
+            val numberOfPeople = soKhach.toIntOrNull() ?: 0
 
-            val invoice = SAInvoiceItem(
+            val mainInvoice = SAInvoiceItem(
                 refId = refId,
                 refType = 1,
-                refNo = "HD001",
-                refDate = System.currentTimeMillis(),
+                refNo = "HD001", // Có thể tùy biến số hóa đơn
+                refDate = refDate,
                 amount = amount,
                 returnAmount = 0.0,
                 receiveAmount = amount,
                 remainAmount = 0.0,
                 journalMemo = "",
                 paymentStatus = 0,
-                numberOfPeople = soKhach.toIntOrNull() ?: 0,
+                numberOfPeople = numberOfPeople,
                 tableName = soBan,
-                createdDate = System.currentTimeMillis(),
+                createdDate = refDate,
                 createdBy = "",
                 modifiedDate = null,
                 modifiedBy = null
             )
 
-            invoiceRepo.insertInvoice(invoice)
+            invoiceRepo.insertInvoice(mainInvoice)
+            details.forEach { invoiceDetailRepo.insertDetail(it.copy(RefID = refId)) }
 
-            details.mapIndexed { index, detail ->
-                detail.copy(
-                    RefDetailID = UUID.randomUUID().toString(),
-                    RefID = refId,
-                    SortOrder = index + 1
-                )
-            }.forEach { invoiceDetailRepo.insertDetail(it) }
+            view.showMessage("Lưu hóa đơn thành công!")
+            loadInvoiceItems()
         }
     }
 }

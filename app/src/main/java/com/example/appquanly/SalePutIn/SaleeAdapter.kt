@@ -1,91 +1,139 @@
 package com.example.appquanly.SalePutIn
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.appquanly.ChooseDish.view.ChooseDishActivity
+import com.example.appquanly.Invoice.InvoiceActivity
 import com.example.appquanly.R
-import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
+
 
 class SaleeAdapter(
-    private val invoices: MutableList<SAInvoiceItem>,
-    private val onCancelClick: () -> Unit,
-    private val onPayClick: () -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val invoicesWithDetails: MutableList<InvoiceWithDetails>,
+    private val onCancelClick: (InvoiceWithDetails) -> Unit,
+    private val onPayClick: (InvoiceWithDetails) -> Unit
+) : RecyclerView.Adapter<SaleeAdapter.InvoiceViewHolder>() {
 
-    companion object {
-        private const val TYPE_HEADER = 0
-        private const val TYPE_ITEM = 1
-    }
-
-    private var tableName: String = ""
-    private var numberOfPeople: Int = 0
-
-    fun updateData(newList: List<SAInvoiceItem>) {
-        invoices.clear()
-        invoices.addAll(newList)
-
-        // Lấy dữ liệu header từ item đầu tiên (nếu có)
-        tableName = newList.firstOrNull()?.tableName ?: "?"
-        numberOfPeople = newList.firstOrNull()?.numberOfPeople ?: 0
-
+    fun updateData(newList: List<InvoiceWithDetails>) {
+        invoicesWithDetails.clear()
+        invoicesWithDetails.addAll(newList)
         notifyDataSetChanged()
     }
 
-    fun getCurrentItems(): List<SAInvoiceItem> = invoices
+    fun getData(): List<InvoiceWithDetails> = invoicesWithDetails
 
-    override fun getItemViewType(position: Int): Int {
-        return if (position == 0) TYPE_HEADER else TYPE_ITEM
+    fun getCurrentItems(): List<InvoiceWithDetails> = invoicesWithDetails
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InvoiceViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_product, parent, false)
+        return InvoiceViewHolder(view)
     }
 
-    override fun getItemCount(): Int = invoices.size + 1 // +1 cho header
+    override fun getItemCount(): Int = invoicesWithDetails.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        return if (viewType == TYPE_HEADER) {
-            val view = inflater.inflate(R.layout.item_product, parent, false)
-            HeaderViewHolder(view)
-        } else {
-            val view = inflater.inflate(R.layout.item_product, parent, false)
-            ItemViewHolder(view)
-        }
+    override fun onBindViewHolder(holder: InvoiceViewHolder, position: Int) {
+        val item = invoicesWithDetails[position]
+        holder.bind(item)
     }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is HeaderViewHolder) {
-            holder.bind(tableName, numberOfPeople)
-        } else if (holder is ItemViewHolder) {
-            val item = invoices[position - 1]
-            holder.bind(item)
-        }
-    }
-
-    inner class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvTableNumber: TextView = itemView.findViewById(R.id.tvTableNumber)
+    inner class InvoiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tvDishNames: TextView = itemView.findViewById(R.id.tvDishNames)
+        private val tvTotalAmount: TextView = itemView.findViewById(R.id.tvTotalAmount)
         private val tvNumberOfPeople: TextView = itemView.findViewById(R.id.tvNumberOfPeople)
+        private val tvTableNumber: TextView = itemView.findViewById(R.id.tvTableNumber)
         private val btnCancel: LinearLayout = itemView.findViewById(R.id.btnCancel)
         private val btnPay: LinearLayout = itemView.findViewById(R.id.btnPay)
+        private val flCircleTableNumber: View = itemView.findViewById(R.id.flCircleTableNumber)
 
-        init {
-            btnCancel.setOnClickListener { onCancelClick() }
-            btnPay.setOnClickListener { onPayClick() }
+        fun bind(itemWithDetails: InvoiceWithDetails) {
+            val invoice = itemWithDetails.invoice
+            val details = itemWithDetails.details
+
+            val grouped = details
+                .groupBy { it.InventoryItemName }
+                .map { (name, items) ->
+                    val quantity = items.sumOf { it.quantity }
+                    val price = items.firstOrNull()?.price ?: 0.0
+                    name to (quantity to price)
+                }
+
+            val dishNames = grouped.joinToString(", ") { (name, pair) ->
+                val (quantity, _) = pair
+                "$name ($quantity)"
+            }
+
+            val totalAmount = grouped.sumOf { (_, pair) ->
+                val (quantity, price) = pair
+                quantity * price
+            }
+
+            tvDishNames.text = if (dishNames.isNotBlank()) dishNames else "Chưa có món"
+            tvTotalAmount.text = "%,.0f đ".format(totalAmount)
+
+            val numberOfPeopleText = invoice.numberOfPeople.takeIf { it > 0 }?.toString() ?: "-"
+            tvNumberOfPeople.text = numberOfPeopleText
+
+            tvTableNumber.text = invoice.tableName ?: "-"
+
+            if (invoice.tableName.isNullOrBlank()) {
+                flCircleTableNumber.setBackgroundResource(R.drawable.bg_circle_gray)
+            } else {
+                flCircleTableNumber.setBackgroundResource(R.drawable.circle_green)
+            }
+
+            // Khi nhấn nút "Thu tiền"
+            btnPay.setOnClickListener {
+                val context = itemView.context
+                val intent = Intent(context, InvoiceActivity::class.java)
+                intent.putExtra("invoiceItem", itemWithDetails.invoice)
+                intent.putParcelableArrayListExtra("invoiceDetails", ArrayList(itemWithDetails.details))
+                context.startActivity(intent)
+
+                onPayClick(itemWithDetails)
+            }
+
+            // Khi nhấn nút "Hủy"
+            btnCancel.setOnClickListener {
+                showCancelDialog(itemWithDetails)
+            }
+
+            // Khi nhấn vào toàn bộ itemView → quay lại ThucDonActivity và truyền danh sách món đã chọn
+            itemView.setOnClickListener {
+                val context = itemView.context
+                val intent = Intent(context, ChooseDishActivity::class.java)
+                intent.putExtra("invoiceItem", itemWithDetails.invoice)
+                intent.putParcelableArrayListExtra("selectedItems", ArrayList(itemWithDetails.details))
+                context.startActivity(intent)
+            }
         }
 
-        fun bind(tableName: String, numberOfPeople: Int) {
-            tvTableNumber.text = tableName
-            tvNumberOfPeople.text = numberOfPeople.toString()
-        }
-    }
+        private fun showCancelDialog(itemWithDetails: InvoiceWithDetails) {
+            val context = itemView.context
+            val builder = AlertDialog.Builder(context)
+            val inflater = LayoutInflater.from(context)
+            val dialogView = inflater.inflate(R.layout.activity_popup, null)
 
-    inner class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvTableName: TextView = itemView.findViewById(R.id.tvTableName)
-        private val tvTotalAmount: TextView = itemView.findViewById(R.id.tvTotalAmount)
+            builder.setView(dialogView)
+            val dialog = builder.create()
+            dialog.show()
 
-        fun bind(item: SAInvoiceItem) {
-            tvTableName.text = item.listItemName ?: ""
-            tvTotalAmount.text = "%,.0f đ".format(item.amount)
+            val btnCancelAdd = dialogView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btnCancelAdd)
+            val btnSaveAdd = dialogView.findViewById<androidx.appcompat.widget.AppCompatButton>(R.id.btnSaveAdd)
+            val btnCloseAdd = dialogView.findViewById<ImageView>(R.id.btnCloseAdd)
+
+            btnCancelAdd.setOnClickListener { dialog.dismiss() }
+            btnCloseAdd.setOnClickListener { dialog.dismiss() }
+            btnSaveAdd.setOnClickListener {
+                onCancelClick(itemWithDetails)
+                dialog.dismiss()
+            }
         }
     }
 }

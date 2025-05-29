@@ -2,32 +2,30 @@ package com.example.appquanly.SalePutIn
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.appquanly.*
-import com.example.appquanly.MenuCategory.Menu_CategoryActivity
 import com.example.appquanly.LinkAccount.Link_AccountActivity
 import com.example.appquanly.Login.LoginActivity
+import com.example.appquanly.MenuCategory.Menu_CategoryActivity
 import com.example.appquanly.ProductInformation.ProductlnformationActivity
 import com.example.appquanly.Report.ReportActivity
 import com.example.appquanly.Setup.Set_upActivity
 import com.example.appquanly.Sychronize.SychronizeActivity
-import com.google.android.material.navigation.NavigationView
-import android.view.MenuItem
-
 import com.example.appquanly.salee.SaleeActivity
+import com.google.android.material.navigation.NavigationView
 
-abstract class BaseDrawerActivity : AppCompatActivity() {
+abstract class BaseDrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     protected lateinit var drawerLayout: DrawerLayout
     protected lateinit var navigationView: NavigationView
     protected lateinit var toolbar: Toolbar
 
     abstract fun getLayoutId(): Int
-
-    // trả về id menu item tương ứng với Activity hiện tại để set check mark
     abstract fun getNavigationMenuItemId(): Int
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,20 +38,18 @@ abstract class BaseDrawerActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
 
-        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close)
+        val toggle = ActionBarDrawerToggle(
+            this, drawerLayout, toolbar,
+            R.string.open, R.string.close
+        )
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
-        navigationView.setNavigationItemSelectedListener { menuItem ->
-            onNavigationItemSelected(menuItem)
-            true
-        }
-
-        // Đánh dấu item menu hiện tại đang mở
+        navigationView.setNavigationItemSelectedListener(this)
         navigationView.setCheckedItem(getNavigationMenuItemId())
     }
 
-    open fun onNavigationItemSelected(item: MenuItem) {
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.ban_hang -> {
                 if (this !is SaleeActivity) {
@@ -101,8 +97,9 @@ abstract class BaseDrawerActivity : AppCompatActivity() {
                 startActivity(Intent(this, LoginActivity::class.java))
                 finishAffinity()
             }
-            // Thêm các menu khác tương tự nếu cần
         }
-        drawerLayout.closeDrawers()
+
+        drawerLayout.closeDrawer(GravityCompat.START)
+        return true
     }
 }

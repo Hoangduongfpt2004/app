@@ -1,8 +1,9 @@
 package com.example.appquanly.data.sqlite.Entity
 
-import java.io.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-
+@Parcelize
 data class SAInvoiceItem(
     val refId: String,
     val refType: Int,
@@ -22,5 +23,4 @@ data class SAInvoiceItem(
     val modifiedDate: Long?,
     val modifiedBy: String?,
     var quantity: Int = 0
-) : Serializable
-
+) : Parcelable

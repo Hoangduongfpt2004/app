@@ -44,10 +44,6 @@
             android:textStyle="bold"/>
     </RelativeLayout>
 
-    <!-- Nội dung scroll -->
-
-    <!-- Nút bên dưới -->
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -57,7 +53,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_margin="10dp">
 
             <!-- Header -->
             <TextView
@@ -108,13 +105,10 @@
                     android:layout_height="wrap_content"
                     android:stretchColumns="*"
                     android:padding="8dp"
-
                     android:layout_marginTop="8dp">
-
-
                 </TableLayout>
-
             </LinearLayout>
+
             <!-- SỐ TIỀN PHẢI TRẢ -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -195,7 +189,6 @@
                 android:layout_marginVertical="4dp"
                 android:background="@color/black" />
 
-
             <!-- TIỀN TRẢ LẠI -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -238,7 +231,7 @@
             android:id="@+id/btnXong"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/blue"
+            android:background="#0A5EA2"
             android:text="XONG"
             android:textColor="@color/white"/>
 

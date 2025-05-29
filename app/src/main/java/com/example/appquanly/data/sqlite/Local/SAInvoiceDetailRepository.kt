@@ -39,7 +39,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
 
     fun insertDetail(detail: SAInvoiceDetail): Long {
         val db = DatabaseCopyHelper(context).writableDatabase
-        // ⚠️ Đảm bảo RefDetailID không bị trùng
         val detailWithUniqueID = detail.copy(
             RefDetailID = UUID.randomUUID().toString()
         )
@@ -54,7 +53,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
         db.beginTransaction()
         try {
             for (detail in details) {
-                // ⚠️ Luôn tạo mới RefDetailID cho từng detail
                 val detailWithID = detail.copy(
                     RefDetailID = UUID.randomUUID().toString()
                 )
@@ -88,6 +86,8 @@ class SAInvoiceDetailRepository(private val context: Context) {
     }
 
     private fun cursorToDetail(cursor: Cursor): SAInvoiceDetail {
+        val soLuong = cursor.getFloat(cursor.getColumnIndexOrThrow("Quantity"))
+        val donGia = cursor.getFloat(cursor.getColumnIndexOrThrow("UnitPrice"))
         return SAInvoiceDetail(
             RefDetailID = cursor.getString(cursor.getColumnIndexOrThrow("RefDetailID")),
             RefDetailType = cursor.getInt(cursor.getColumnIndexOrThrow("RefDetailType")),
@@ -96,15 +96,17 @@ class SAInvoiceDetailRepository(private val context: Context) {
             InventoryItemName = cursor.getString(cursor.getColumnIndexOrThrow("InventoryItemName")),
             UnitID = cursor.getString(cursor.getColumnIndexOrThrow("UnitID")),
             UnitName = cursor.getString(cursor.getColumnIndexOrThrow("UnitName")),
-            Quantity = cursor.getFloat(cursor.getColumnIndexOrThrow("Quantity")),
-            UnitPrice = cursor.getFloat(cursor.getColumnIndexOrThrow("UnitPrice")),
+            Quantity = soLuong,
+            UnitPrice = donGia,
             Amount = cursor.getFloat(cursor.getColumnIndexOrThrow("Amount")),
             Description = cursor.getString(cursor.getColumnIndexOrThrow("Description")),
             SortOrder = cursor.getInt(cursor.getColumnIndexOrThrow("SortOrder")),
             CreatedDate = cursor.getLongOrNull("CreatedDate"),
             CreatedBy = cursor.getString(cursor.getColumnIndexOrThrow("CreatedBy")),
             ModifiedDate = cursor.getLongOrNull("ModifiedDate"),
-            ModifiedBy = cursor.getString(cursor.getColumnIndexOrThrow("ModifiedBy"))
+            ModifiedBy = cursor.getString(cursor.getColumnIndexOrThrow("ModifiedBy")),
+            quantity = soLuong.toInt(),
+            price = donGia.toDouble()
         )
     }
 
@@ -129,7 +131,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
         }
     }
 
-    // Extension function để lấy Long? từ Cursor một cách an toàn
     private fun Cursor.getLongOrNull(columnName: String): Long? {
         val index = getColumnIndex(columnName)
         return if (index != -1 && !isNull(index)) getLong(index) else null

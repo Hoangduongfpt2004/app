@@ -3,6 +3,8 @@ package com.example.appquanly.data.sqlite.Local
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.util.Log
+import com.example.appquanly.SalePutIn.InvoiceWithDetails
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 
@@ -10,12 +12,10 @@ class SAInvoiceRepository(private val context: Context) {
 
     private val detailRepo = SAInvoiceDetailRepository(context)
 
-    // Lấy tất cả hóa đơn
     fun getAllInvoices(): List<SAInvoiceItem> {
         val list = mutableListOf<SAInvoiceItem>()
         val db = DatabaseCopyHelper(context).readableDatabase
         val cursor = db.rawQuery("SELECT * FROM SAInvoice", null)
-
         if (cursor.moveToFirst()) {
             do {
                 list.add(cursorToInvoice(cursor))
@@ -26,44 +26,45 @@ class SAInvoiceRepository(private val context: Context) {
         return list
     }
 
-    // Lấy hóa đơn theo ID
+    fun getAllInvoicesWithDetails(): List<InvoiceWithDetails> {
+        val invoicesWithDetails = mutableListOf<InvoiceWithDetails>()
+        val invoices = getAllInvoices()
+        for (invoice in invoices) {
+            val details = detailRepo.getDetailsByRefID(invoice.refId)
+            invoicesWithDetails.add(InvoiceWithDetails(invoice, details))
+        }
+        return invoicesWithDetails
+    }
+
     fun getInvoiceById(refId: String): SAInvoiceItem? {
         val db = DatabaseCopyHelper(context).readableDatabase
         val cursor = db.rawQuery("SELECT * FROM SAInvoice WHERE RefID = ?", arrayOf(refId))
         var invoice: SAInvoiceItem? = null
-
         if (cursor.moveToFirst()) {
             invoice = cursorToInvoice(cursor)
         }
-
         cursor.close()
         db.close()
         return invoice
     }
 
-    // Thêm hóa đơn mới
     fun insertInvoice(invoice: SAInvoiceItem): Boolean {
         val db = DatabaseCopyHelper(context).writableDatabase
         return try {
-            // Kiểm tra xem RefID đã tồn tại chưa
             val cursor = db.query(
-                "SAInvoice",                    // bảng
-                arrayOf("RefID"),               // cột cần lấy
-                "RefID = ?",                   // điều kiện WHERE
-                arrayOf(invoice.refId),         // giá trị tham số
+                "SAInvoice",
+                arrayOf("RefID"),
+                "RefID = ?",
+                arrayOf(invoice.refId),
                 null, null, null
             )
             val exists = cursor.count > 0
             cursor.close()
-
             if (exists) {
-                // Nếu tồn tại rồi thì không insert, có thể trả về false hoặc true tuỳ ý
                 db.close()
                 false
             } else {
-                // Nếu chưa tồn tại thì insert mới
-                val values = invoiceToContentValues(invoice)
-                val result = db.insert("SAInvoice", null, values)
+                val result = db.insert("SAInvoice", null, invoiceToContentValues(invoice))
                 db.close()
                 result != -1L
             }
@@ -74,8 +75,6 @@ class SAInvoiceRepository(private val context: Context) {
         }
     }
 
-
-
     fun deleteInvoiceById(refId: String): Int {
         val db = DatabaseCopyHelper(context).writableDatabase
         val result = db.delete("SAInvoice", "RefID = ?", arrayOf(refId))
@@ -83,30 +82,25 @@ class SAInvoiceRepository(private val context: Context) {
         return result
     }
 
-    // Lấy danh sách hóa đơn mới nhất (theo ngày giảm dần)
     fun getLatestInvoices(): List<SAInvoiceItem> {
         val db = DatabaseCopyHelper(context).readableDatabase
         val cursor = db.rawQuery("SELECT * FROM SAInvoice ORDER BY RefDate DESC", null)
         val invoices = mutableListOf<SAInvoiceItem>()
-
         if (cursor.moveToFirst()) {
             do {
                 invoices.add(cursorToInvoice(cursor))
             } while (cursor.moveToNext())
         }
-
         cursor.close()
         db.close()
         return invoices
     }
 
-    // Lấy hóa đơn mới nhất
     fun getLatestInvoice(): SAInvoiceItem? {
         val invoices = getLatestInvoices()
-        return if (invoices.isNotEmpty()) invoices[0] else null
+        return invoices.firstOrNull()
     }
 
-    // Chuyển cursor thành đối tượng SAInvoiceItem
     private fun cursorToInvoice(cursor: Cursor): SAInvoiceItem {
         return SAInvoiceItem(
             refId = cursor.getString(cursor.getColumnIndexOrThrow("RefID")),
@@ -129,67 +123,69 @@ class SAInvoiceRepository(private val context: Context) {
         )
     }
 
-    // Chuyển SAInvoiceItem thành ContentValues
     private fun invoiceToContentValues(invoice: SAInvoiceItem): ContentValues {
         return ContentValues().apply {
-            put("refID", invoice.refId)
-            put("refType", invoice.refType)
-            put("refNo", invoice.refNo)
-            put("refDate", invoice.refDate)
-            put("amount", invoice.amount)
-            put("returnAmount", invoice.returnAmount)
-            put("receiveAmount", invoice.receiveAmount)
-            put("remainAmount", invoice.remainAmount)
-            put("journalMemo", invoice.journalMemo)
-            put("paymentStatus", invoice.paymentStatus)
-            put("numberOfPeople", invoice.numberOfPeople)
-            put("tableName", invoice.tableName)
-            put("listItemName", invoice.listItemName)
-            put("createdDate", invoice.createdDate)
-            put("createdBy", invoice.createdBy)
-            put("modifiedDate", invoice.modifiedDate)
-            put("modifiedBy", invoice.modifiedBy)
+            put("RefID", invoice.refId)
+            put("RefType", invoice.refType)
+            put("RefNo", invoice.refNo)
+            put("RefDate", invoice.refDate)
+            put("Amount", invoice.amount)
+            put("ReturnAmount", invoice.returnAmount)
+            put("ReceiveAmount", invoice.receiveAmount)
+            put("RemainAmount", invoice.remainAmount)
+            put("JournalMemo", invoice.journalMemo)
+            put("PaymentStatus", invoice.paymentStatus)
+            put("NumberOfPeople", invoice.numberOfPeople)
+            put("TableName", invoice.tableName)
+            put("ListItemName", invoice.listItemName)
+            put("CreatedDate", invoice.createdDate)
+            put("CreatedBy", invoice.createdBy)
+            put("ModifiedDate", invoice.modifiedDate)
+            put("ModifiedBy", invoice.modifiedBy)
         }
     }
 
-    // Extension để lấy Long? từ Cursor
     private fun Cursor.getLongOrNull(columnName: String): Long? {
         val index = getColumnIndex(columnName)
         return if (index != -1 && !isNull(index)) getLong(index) else null
     }
 
-    // --- DAO xử lý chi tiết hóa đơn thông qua SAInvoiceDetailRepository ---
-    fun insertInvoiceDetail(detail: SAInvoiceDetail): Boolean {
-        return detailRepo.insertDetail(detail) != -1L
+    fun insertInvoiceDetail(detail: SAInvoiceDetail): Long {
+        return detailRepo.insertDetail(detail)
     }
 
-    fun insertInvoiceItems(details: List<SAInvoiceDetail>) {
+    fun insertInvoiceDetails(details: List<SAInvoiceDetail>) {
         detailRepo.insertDetails(details)
     }
 
-    fun getDetailsByRefID(refID: String): List<SAInvoiceDetail> {
-        return detailRepo.getDetailsByRefID(refID)
-    }
-
-    fun deleteInvoiceDetails(refID: String): Int {
+    fun deleteInvoiceDetailsByRefID(refID: String): Int {
         return detailRepo.deleteByRefID(refID)
     }
 
-    fun updateInvoiceDetail(detail: SAInvoiceDetail): Int {
-        return detailRepo.updateDetail(detail)
+    fun deleteInvoiceAndDetailsById(refId: String): Boolean {
+        val db = DatabaseCopyHelper(context).writableDatabase
+        try {
+            db.beginTransaction()
+
+            val detailsDeleted = db.delete("SAInvoiceDetail", "RefID = ?", arrayOf(refId))
+            val invoiceDeleted = db.delete("SAInvoice", "RefID = ?", arrayOf(refId))
+
+            db.setTransactionSuccessful()
+
+            Log.d("DeleteInvoice", "Deleted details rows: $detailsDeleted, invoice rows: $invoiceDeleted")
+
+            return (detailsDeleted > 0 || invoiceDeleted > 0)
+        } catch (e: Exception) {
+            Log.e("DeleteInvoice", "Error deleting invoice with RefID=$refId", e)
+            return false
+        } finally {
+            try {
+                db.endTransaction()
+            } catch (e: Exception) {
+                Log.e("DeleteInvoice", "Error ending transaction", e)
+            }
+            db.close()
+        }
     }
 
-    fun getDetailsOfLatestInvoice(): List<SAInvoiceDetail> {
-        val latestInvoice = getLatestInvoice() ?: return emptyList()
-        return detailRepo.getDetailsByRefID(latestInvoice.refId)
-    }
-
-    // ✅ Thêm DAO như bạn yêu cầu
-    fun insertIntoSAInvoiceItem(detail: SAInvoiceDetail): Boolean {
-        return insertInvoiceDetail(detail)
-    }
-
-    fun insertIntoSAInvoice(invoice: SAInvoiceItem): Boolean {
-        return insertInvoice(invoice)
-    }
 }

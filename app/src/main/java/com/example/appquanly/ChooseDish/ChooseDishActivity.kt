@@ -35,6 +35,7 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
     companion object {
         const val REQUEST_CODE_CALCULATOR = 1001
+        const val REQUEST_CODE_SALEE = 2001  // Thêm REQUEST_CODE_SALEE để dùng onActivityResult
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,8 +129,6 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             startActivity(intent)
         }
 
-
-
         btnCollectMoney.setOnClickListener {
             val selectedDetails: List<SAInvoiceDetail> = presenter.getSelectedInvoiceDetails()
             val intent = Intent(this, InvoiceActivity::class.java)
@@ -199,8 +198,6 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
         // Tạm để trống hoặc bổ sung khi cần
     }
 
-
-
     override fun navigateToSaleeScreen(invoiceItems: List<SAInvoiceItem>) {
         val intent = Intent(this, SaleeActivity::class.java)
         val bundle = Bundle()
@@ -209,6 +206,38 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
         startActivity(intent)
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SALEE && resultCode == RESULT_OK) {
+            val selectedItems = data?.getParcelableArrayListExtra<SAInvoiceDetail>("selected_items")
+            selectedItems?.let {
+                // Map sang InventoryItem và cập nhật adapter
+                val selectedInventoryItems = it.map { detail ->
+                    InventoryItem(
+                        InventoryItemID = detail.InventoryItemID ?: "",
+                        InventoryItemCode = null,
+                        InventoryItemType = null,
+                        InventoryItemName = detail.InventoryItemName,
+                        UnitID = null,
+                        Price = detail.UnitPrice ?: 0f,
+                        Description = null,
+                        Inactive = false,
+                        CreatedDate = "",
+                        CreatedBy = null,
+                        ModifiedBy = null,
+                        Color = null,
+                        IconFileName = null,
+                        UseCount = 0,
+                        quantity = detail.Quantity?.toInt() ?: 0,  // <-- Chuyển về Int rõ ràng
+                        isTicked = true
+                    )
+                }
+                adapter.setSelectedItems(selectedInventoryItems)
+
+            }
+
+            }
+        }
+    }
 
 
-}

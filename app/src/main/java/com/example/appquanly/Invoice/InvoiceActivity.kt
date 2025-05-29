@@ -10,7 +10,9 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import com.example.appquanly.CalculatorDialogFragment
 import com.example.appquanly.R
+
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
+import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -80,15 +82,17 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     }
 
     private fun initDataFromIntent() {
+        val invoiceItem = intent.getParcelableExtra<SAInvoiceItem>("invoiceItem")
+        val invoiceDetails = intent.getParcelableArrayListExtra<SAInvoiceDetail>("invoiceDetails")
+
         val soBan = intent.getStringExtra("EXTRA_SO_BAN")
-        tvSoBan.text = soBan?.let { " Bàn $it " } ?: "Chưa có số bàn"
+        tvSoBan.text = soBan?.let { " Bàn $it " }
 
         val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time)
         tvNgay.text = "Ngày: $formattedDate"
 
-        val details: ArrayList<SAInvoiceDetail>? = intent.getParcelableArrayListExtra("EXTRA_INVOICE_DETAILS")
-        if (details != null && details.isNotEmpty()) {
-            displayInvoiceDetails(details)
+        if (invoiceDetails != null && invoiceDetails.isNotEmpty()) {
+            displayInvoiceDetails(invoiceDetails)
         } else {
             showToast("Không có dữ liệu hóa đơn")
         }

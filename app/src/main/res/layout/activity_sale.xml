@@ -21,9 +21,19 @@
             android:layout_height="56dp"
             android:background="#0076D7"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="Bán hàng"
-            app:titleTextColor="@android:color/white"
-            app:navigationIcon="@drawable/baseline_menu_24" />
+            app:titleTextColor="@android:color/white">
+
+            <!-- TextView tiêu đề căn giữa -->
+            <TextView
+                android:id="@+id/toolbarTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="Bán hàng"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.Toolbar>
 
         <!-- Nội dung chính bên dưới toolbar -->
         <FrameLayout
@@ -81,7 +91,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="8dp"
-                android:background="@color/blue_grey_base"
+                android:background="#FFFFFF"
                 android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>

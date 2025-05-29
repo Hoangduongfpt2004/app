@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-        <item
+    <item
             android:id="@+id/ban_hang"
             android:title="Bán Hàng"
             android:icon="@drawable/logo_ban_hang"
@@ -66,8 +67,6 @@
     </item>
 
 
-
-    <!-- Nhóm 4: TÀI KHOẢN -->
     <item
         android:id="@+id/menu_tai_khoan"
         android:title="Tài Khoản"

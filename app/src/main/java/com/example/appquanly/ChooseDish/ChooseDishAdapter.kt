@@ -35,30 +35,29 @@ class ChooseDishAdapter(
         val btnIncrease: ImageView = itemView.findViewById(R.id.btnIncrease)
         val btnDecrease: ImageView = itemView.findViewById(R.id.btnDecrease)
         val layoutQuantity: LinearLayout = itemView.findViewById(R.id.layoutQuantity)
-        val ivTick: ImageView = itemView.findViewById(R.id.ivTick) // icon tick trong item
+        val ivTick: ImageView = itemView.findViewById(R.id.ivTick)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_dish, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_dish, parent, false)
         return ViewHolder(view)
     }
 
-    override fun getItemCount() = list.size
+    override fun getItemCount(): Int = list.size
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[position]
         val context = holder.itemView.context
 
+        // Tên và giá
         holder.tvName.text = item.InventoryItemName ?: "Tên món trống"
-
-        val priceFormatted = item.Price?.let {
-            val format = NumberFormat.getNumberInstance(Locale("vi", "VN"))
-            format.format(it) + " đ"
+        holder.tvPrice.text = item.Price?.let {
+            NumberFormat.getNumberInstance(Locale("vi", "VN")).format(it) + " đ"
         } ?: "0 đ"
 
-        holder.tvPrice.text = priceFormatted
-
-        item.IconFileName?.let { iconName ->
+        // Icon món
+        val iconName = item.IconFileName
+        if (!iconName.isNullOrEmpty()) {
             val assetPath = "icondefault/$iconName"
             try {
                 context.assets.open(assetPath).use { inputStream ->
@@ -68,73 +67,58 @@ class ChooseDishAdapter(
             } catch (e: IOException) {
                 holder.ivIcon.setImageResource(R.drawable.ic_default)
             }
-        } ?: holder.ivIcon.setImageResource(R.drawable.ic_default)
+        } else {
+            holder.ivIcon.setImageResource(R.drawable.ic_default)
+        }
 
-        item.Color?.let { colorString ->
+        // Màu nền icon
+        item.Color?.let {
             try {
-                holder.ivIcon.backgroundTintList =
-                    ColorStateList.valueOf(Color.parseColor(colorString))
-            } catch (e: IllegalArgumentException) {
+                holder.ivIcon.backgroundTintList = ColorStateList.valueOf(Color.parseColor(it))
+            } catch (e: Exception) {
                 holder.ivIcon.backgroundTintList = ColorStateList.valueOf(Color.LTGRAY)
             }
         } ?: run {
             holder.ivIcon.backgroundTintList = null
         }
 
-        val currentQuantity = item.quantity ?: 0
+        val quantity = item.quantity ?: 0
         val isTicked = item.isTicked ?: false
 
         if (isTicked) {
-            // Nếu đã tick: ẩn nút tăng giảm, ẩn số lượng, chỉ hiện tick
+            // Nếu đã tick: ẩn tăng giảm, ẩn layout số lượng, chỉ hiện tick
             holder.layoutQuantity.visibility = View.GONE
             holder.ivTick.visibility = View.VISIBLE
         } else {
-            // Chưa tick
-            if (currentQuantity > 0) {
+            if (quantity > 0) {
                 holder.layoutQuantity.visibility = View.VISIBLE
-                holder.tvQuantity.text = currentQuantity.toString()
+                holder.tvQuantity.text = quantity.toString()
                 holder.ivTick.visibility = View.VISIBLE
             } else {
                 holder.layoutQuantity.visibility = View.GONE
                 holder.tvQuantity.text = ""
-                holder.ivTick.visibility = View.GONE // Ẩn dấu tích luôn nếu quantity = 0 và chưa tick
+                holder.ivTick.visibility = View.GONE
             }
         }
 
-        // Bấm vào dấu tick 1 lần là reset và ẩn dấu tích luôn
+        // Click tick để bỏ tick hoặc tick lại
         holder.ivTick.setOnClickListener {
-            if (isTicked) {
-                // Bỏ tick: reset số lượng về 0 và ẩn tick
+            if (item.isTicked == true) {
                 item.isTicked = false
                 item.quantity = 0
             } else {
-                // Tick: ẩn nút tăng giảm, giữ nguyên quantity nếu cần
                 item.isTicked = true
             }
             notifyItemChanged(position)
         }
 
+        // Set click nếu chưa bị tick
         if (!isTicked) {
-
-            holder.btnIncrease.setOnClickListener {
-                listener.onIncrease(item)
-            }
-
-            holder.btnDecrease.setOnClickListener {
-                listener.onDecrease(item)
-            }
-
-            holder.tvQuantity.setOnClickListener {
-                listener.onQuantityClick(item, position)
-            }
-
-
-            holder.itemView.setOnClickListener {
-                listener.onIncrease(item)
-            }
-
+            holder.btnIncrease.setOnClickListener { listener.onIncrease(item) }
+            holder.btnDecrease.setOnClickListener { listener.onDecrease(item) }
+            holder.tvQuantity.setOnClickListener { listener.onQuantityClick(item, position) }
+            holder.itemView.setOnClickListener { listener.onIncrease(item) }
         } else {
-
             holder.btnIncrease.setOnClickListener(null)
             holder.btnDecrease.setOnClickListener(null)
             holder.tvQuantity.setOnClickListener(null)
@@ -153,5 +137,14 @@ class ChooseDishAdapter(
             list[position].quantity = quantity
             notifyItemChanged(position)
         }
+    }
+
+    fun setSelectedItems(selectedList: List<InventoryItem>) {
+        for (item in list) {
+            val matched = selectedList.find { it.InventoryItemID == item.InventoryItemID }
+            item.isTicked = matched?.isTicked ?: false
+            item.quantity = matched?.quantity ?: 0
+        }
+        notifyDataSetChanged()
     }
 }

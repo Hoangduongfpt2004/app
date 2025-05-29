@@ -20,6 +20,9 @@ data class SAInvoiceDetail(
     val CreatedDate: Long?,
     val CreatedBy: String,
     val ModifiedDate: Long?,
-    val ModifiedBy: String
+    val ModifiedBy: String,
+    val quantity: Int = 1,
+    val price: Double = 0.0
+
 ) : Parcelable
 
