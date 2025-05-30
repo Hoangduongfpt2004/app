@@ -131,12 +131,18 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
         btnCollectMoney.setOnClickListener {
             val selectedDetails: List<SAInvoiceDetail> = presenter.getSelectedInvoiceDetails()
+            val soBan = findViewById<TextView>(R.id.seting).text.toString()
+            val soKhach = findViewById<TextView>(R.id.avatar).text.toString()
+            val tongTien = tvTotalMoney.text.toString()
+
             val intent = Intent(this, InvoiceActivity::class.java)
             intent.putParcelableArrayListExtra("EXTRA_INVOICE_DETAILS", ArrayList(selectedDetails))
-            val soBan = findViewById<TextView>(R.id.seting).text.toString()
             intent.putExtra("EXTRA_SO_BAN", soBan)
+            intent.putExtra("EXTRA_SO_KHACH", soKhach)
+            intent.putExtra("EXTRA_TONG_TIEN", tongTien)
             startActivity(intent)
         }
+
 
         presenter.loadItemsFromDB()
     }

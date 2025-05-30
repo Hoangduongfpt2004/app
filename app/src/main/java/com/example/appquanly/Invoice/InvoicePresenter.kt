@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import kotlin.math.ceil
 
 class InvoicePresenter(
     private val context: Context,
@@ -25,12 +26,18 @@ class InvoicePresenter(
     private var refDate: Long = 0L
     private var invoiceRefId: String = ""
 
+    // Hàm làm tròn theo bội (ví dụ bội 1000)
+    private fun roundAmount(amount: Double, roundTo: Int = 1000): Double {
+        return ceil(amount / roundTo) * roundTo
+    }
+
     override fun setSelectedItems(items: List<InventoryItem>) {
         itemList = items
     }
 
     override fun loadInvoiceData() {
         totalAmount = itemList.sumOf { (it.Price ?: 0f).toDouble() * it.UseCount.toDouble() }
+        totalAmount = roundAmount(totalAmount) // làm tròn tổng tiền
         view.showInvoiceData(itemList)
         view.showTotalAmount(totalAmount)
 
@@ -42,13 +49,15 @@ class InvoicePresenter(
     }
 
     override fun calculateInvoice(receiveAmount: Double) {
-        val remain = receiveAmount - totalAmount
-        view.showReceiveAmount(receiveAmount)
+        val roundedReceive = roundAmount(receiveAmount)
+        val remain = roundedReceive - totalAmount
+        view.showReceiveAmount(roundedReceive)
         view.showRemainAmount(if (remain >= 0) remain else 0.0)
     }
 
     override fun onDoneClick(receiveAmount: Double) {
-        val remain = receiveAmount - totalAmount
+        val roundedReceive = roundAmount(receiveAmount)
+        val remain = roundedReceive - totalAmount
         invoiceRefId = UUID.randomUUID().toString()
         val refDateNow = System.currentTimeMillis()
         val refNoNow = "HD${refDateNow}"
@@ -61,7 +70,7 @@ class InvoicePresenter(
             refDate = refDateNow,
             amount = totalAmount,
             returnAmount = 0.0,
-            receiveAmount = receiveAmount,
+            receiveAmount = roundedReceive,
             remainAmount = if (remain >= 0) remain else 0.0,
             journalMemo = "Hóa đơn bán hàng",
             paymentStatus = 1, // thanh toán thành công

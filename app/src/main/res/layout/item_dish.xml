@@ -25,15 +25,15 @@
                 android:scaleType="centerCrop" />
 
 
-
             <ImageView
                 android:id="@+id/ivTick"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:src="@drawable/ic_selected"
-                android:background="#80A29E9E"
-                android:scaleType="center"
-                android:visibility="gone" />
+                android:background="@drawable/bg_circle_tick"
+                android:scaleType="centerInside"
+                android:visibility="gone"
+                android:padding="8dp" />
         </FrameLayout>
 
 

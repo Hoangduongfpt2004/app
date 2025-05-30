@@ -10,7 +10,6 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import com.example.appquanly.CalculatorDialogFragment
 import com.example.appquanly.R
-
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
 import java.text.SimpleDateFormat
@@ -28,6 +27,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     private lateinit var tvSoBan: TextView
     private lateinit var btnXong: AppCompatButton
     private lateinit var icBack: ImageView
+    private var invoiceDetails: List<SAInvoiceDetail> = listOf()
 
     private var totalAmount = 0.0
 
@@ -82,11 +82,27 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     }
 
     private fun initDataFromIntent() {
+
+        invoiceDetails = intent.getParcelableArrayListExtra("invoiceDetails")
+            ?: intent.getParcelableArrayListExtra("EXTRA_INVOICE_DETAILS")
+                    ?: listOf()
+
         val invoiceItem = intent.getParcelableExtra<SAInvoiceItem>("invoiceItem")
+
+        // Nhận dữ liệu từ cả nút "Cất" và "Thanh toán"
         val invoiceDetails = intent.getParcelableArrayListExtra<SAInvoiceDetail>("invoiceDetails")
+            ?: intent.getParcelableArrayListExtra("EXTRA_INVOICE_DETAILS")
 
         val soBan = intent.getStringExtra("EXTRA_SO_BAN")
+        val soKhach = intent.getStringExtra("EXTRA_SO_KHACH")
+        val tongTienStr = intent.getStringExtra("EXTRA_TONG_TIEN")
+
         tvSoBan.text = soBan?.let { " Bàn $it " }
+
+        // Hiển thị tổng tiền nếu có truyền vào
+        if (!tongTienStr.isNullOrEmpty()) {
+            tvTongTien.text = " $tongTienStr đ"
+        }
 
         val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time)
         tvNgay.text = "Ngày: $formattedDate"

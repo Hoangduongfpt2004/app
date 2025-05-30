@@ -14,7 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppQuanLy"
         tools:targetApi="31">
-
+        <activity
+            android:name=".Report.ChartDetailActivity"
+            android:exported="false" />
         <activity
             android:name=".Invoice.InvoiceActivity"
             android:exported="false" />
@@ -24,7 +26,6 @@
         <activity
             android:name=".salee.SaleeActivity"
             android:exported="false" />
-
         <activity
             android:name=".CashRegister.CashRegisterActivity"
             android:exported="false" />
@@ -84,6 +85,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -102,7 +104,6 @@
         <activity
             android:name=".SelectDishActivity.SelectDishActivity"
             android:exported="false" />
-
     </application>
 
 </manifest>

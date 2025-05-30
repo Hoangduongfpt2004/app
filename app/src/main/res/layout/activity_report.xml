@@ -21,11 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/blue"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-            >
-
-            <!-- Tiêu đề căn giữa -->
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
@@ -60,7 +57,7 @@
                 style="@style/App_txtTimeFilter"/>
         </LinearLayout>
 
-        <!-- Danh sách các nút lọc thời gian theo chiều dọc với icon -->
+        <!-- Danh sách các nút lọc thời gian -->
         <LinearLayout
             android:id="@+id/timeOptionList"
             android:layout_width="match_parent"
@@ -69,7 +66,7 @@
             android:background="@android:color/white"
             android:padding="12dp">
 
-            <!-- Nút "Hôm qua" -->
+            <!-- Hôm qua -->
             <LinearLayout
                 android:id="@+id/btnHomQua"
                 android:layout_width="match_parent"
@@ -77,24 +74,41 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:padding="12dp"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:weightSum="1">
 
                 <ImageView
-                    android:contentDescription="Hôm qua"
                     android:src="@drawable/img_yesterday"
+                    android:contentDescription="Hôm qua"
                     style="@style/img_icon_day"/>
+
                 <TextView
                     android:text="Hôm qua"
-                    style="@style/font_size"/>
+                    style="@style/font_size"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"/>
+
+                <TextView
+                    android:id="@+id/tvAmountHomQua"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+
+                <ImageView
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Back"
+                    app:tint="@android:color/darker_gray"/>
             </LinearLayout>
 
-            <!-- Separator -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@android:color/darker_gray"/>
 
-            <!-- Nút "Hôm nay" -->
+            <!-- Hôm nay -->
             <LinearLayout
                 android:id="@+id/btnHomNay"
                 android:layout_width="match_parent"
@@ -102,24 +116,41 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:padding="12dp"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:weightSum="1">
 
                 <ImageView
-                    android:contentDescription="Hôm nay"
                     android:src="@drawable/icon_hom_nay"
+                    android:contentDescription="Hôm nay"
                     style="@style/img_icon_day"/>
+
                 <TextView
                     android:text="Hôm nay"
-                    style="@style/font_size"/>
+                    style="@style/font_size"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"/>
+
+                <TextView
+                    android:id="@+id/tvAmountHomNay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+
+                <ImageView
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Back"
+                    app:tint="@android:color/darker_gray"/>
             </LinearLayout>
 
-            <!-- Separator -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@android:color/darker_gray"/>
 
-            <!-- Nút "Tuần này" -->
+            <!-- Tuần này -->
             <LinearLayout
                 android:id="@+id/btnTuanNay"
                 android:layout_width="match_parent"
@@ -127,24 +158,41 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:padding="12dp"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:weightSum="1">
 
                 <ImageView
-                    android:contentDescription="Tuần này"
                     android:src="@drawable/img_7day"
+                    android:contentDescription="Tuần này"
                     style="@style/img_icon_day"/>
+
                 <TextView
                     android:text="Tuần này"
-                    style="@style/font_size"/>
+                    style="@style/font_size"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"/>
+
+                <TextView
+                    android:id="@+id/tvAmountTuanNay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+
+                <ImageView
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Back"
+                    app:tint="@android:color/darker_gray"/>
             </LinearLayout>
 
-            <!-- Separator -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@android:color/darker_gray"/>
 
-            <!-- Nút "Tháng này" -->
+            <!-- Tháng này -->
             <LinearLayout
                 android:id="@+id/btnThangNay"
                 android:layout_width="match_parent"
@@ -152,24 +200,41 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:padding="12dp"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:weightSum="1">
 
                 <ImageView
-                    android:contentDescription="Tháng này"
                     android:src="@drawable/img_30day"
+                    android:contentDescription="Tháng này"
                     style="@style/img_icon_day"/>
+
                 <TextView
                     android:text="Tháng này"
-                    style="@style/font_size"/>
+                    style="@style/font_size"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"/>
+
+                <TextView
+                    android:id="@+id/tvAmountThangNay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+
+                <ImageView
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Back"
+                    app:tint="@android:color/darker_gray"/>
             </LinearLayout>
 
-            <!-- Separator -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@android:color/darker_gray"/>
 
-            <!-- Nút "Năm nay" -->
+            <!-- Năm nay -->
             <LinearLayout
                 android:id="@+id/btnNamNay"
                 android:layout_width="match_parent"
@@ -177,40 +242,51 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:padding="12dp"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/selectableItemBackground"
+                android:weightSum="1">
 
                 <ImageView
-                    android:contentDescription="Năm này"
                     android:src="@drawable/img_365day"
+                    android:contentDescription="Năm nay"
                     style="@style/img_icon_day"/>
+
                 <TextView
                     android:text="Năm nay"
-                    style="@style/font_size"/>
+                    style="@style/font_size"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"/>
+
+                <TextView
+                    android:id="@+id/tvAmountNamNay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+
+                <ImageView
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Back"
+                    app:tint="@android:color/darker_gray"/>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@android:color/darker_gray"/>
         </LinearLayout>
 
-        <!-- Danh sách doanh thu -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerRevenue"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@android:color/white" />
+        <!-- BarChart hiển thị thống kê -->
 
     </LinearLayout>
 
-    <!-- Drawer menu -->
+    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigationView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/activity_navigator_interface"
-        app:menu="@menu/menu_main" />
-
+        app:menu="@menu/menu_main"/>
 </androidx.drawerlayout.widget.DrawerLayout>
