@@ -6,121 +6,65 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
-import java.util.Calendar
-import java.util.UUID
+import java.text.SimpleDateFormat
+import java.util.*
 
 class SAInvoiceDetailRepository(private val context: Context) {
 
-    // Mở db đọc
-    private val db: SQLiteDatabase
+    private val dbRead: SQLiteDatabase
         get() = DatabaseCopyHelper(context).readableDatabase
 
-    // Lấy tất cả chi tiết hóa đơn
-    fun getAllDetails(): List<SAInvoiceDetail> {
-        val list = mutableListOf<SAInvoiceDetail>()
-        val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail", null)
-        if (cursor.moveToFirst()) {
-            do {
-                list.add(cursorToDetail(cursor))
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        return list
+    private val dbWrite: SQLiteDatabase
+        get() = DatabaseCopyHelper(context).writableDatabase
+
+    private fun Cursor.getLongOrNull(columnName: String): Long? {
+        val index = getColumnIndex(columnName)
+        return if (index != -1 && !isNull(index)) getLong(index) else null
     }
 
-    // Lấy chi tiết theo RefID hóa đơn
-    fun getDetailsByRefID(refID: String): List<SAInvoiceDetail> {
-        val list = mutableListOf<SAInvoiceDetail>()
-        val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail WHERE RefID = ?", arrayOf(refID))
-        if (cursor.moveToFirst()) {
-            do {
-                list.add(cursorToDetail(cursor))
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        db.close()
-        return list
-    }
-
-    // Thêm 1 chi tiết hóa đơn (tự tạo RefDetailID mới)
-    fun insertDetail(detail: SAInvoiceDetail): Long {
-        val dbWrite = DatabaseCopyHelper(context).writableDatabase
-        val detailWithUniqueID = detail.copy(
-            RefDetailID = UUID.randomUUID().toString()
-        )
-        Log.d("InsertDetail", "Inserting RefDetailID = ${detailWithUniqueID.RefDetailID}")
-        val result = dbWrite.insert("SAInvoiceDetail", null, detailToContentValues(detailWithUniqueID))
-        dbWrite.close()
-        return result
-    }
-
-    // Thêm nhiều chi tiết cùng lúc (transaction)
-    fun insertDetails(details: List<SAInvoiceDetail>) {
-        val dbWrite = DatabaseCopyHelper(context).writableDatabase
-        dbWrite.beginTransaction()
-        try {
-            for (detail in details) {
-                val detailWithID = detail.copy(
-                    RefDetailID = UUID.randomUUID().toString()
-                )
-                Log.d("InsertDetail", "Bulk insert RefDetailID = ${detailWithID.RefDetailID}")
-                dbWrite.insert("SAInvoiceDetail", null, detailToContentValues(detailWithID))
-            }
-            dbWrite.setTransactionSuccessful()
-        } finally {
-            dbWrite.endTransaction()
-            dbWrite.close()
-        }
-    }
-
-    // Xóa chi tiết theo RefID
-    fun deleteByRefID(refID: String): Int {
-        val dbWrite = DatabaseCopyHelper(context).writableDatabase
-        val result = dbWrite.delete("SAInvoiceDetail", "RefID = ?", arrayOf(refID))
-        dbWrite.close()
-        return result
-    }
-
-    // Cập nhật chi tiết theo RefDetailID
-    fun updateDetail(detail: SAInvoiceDetail): Int {
-        val dbWrite = DatabaseCopyHelper(context).writableDatabase
-        val result = dbWrite.update(
-            "SAInvoiceDetail",
-            detailToContentValues(detail),
-            "RefDetailID = ?",
-            arrayOf(detail.RefDetailID)
-        )
-        dbWrite.close()
-        return result
-    }
-
-    // Chuyển cursor sang đối tượng SAInvoiceDetail
     private fun cursorToDetail(cursor: Cursor): SAInvoiceDetail {
-        val soLuong = cursor.getFloat(cursor.getColumnIndexOrThrow("Quantity"))
-        val donGia = cursor.getFloat(cursor.getColumnIndexOrThrow("UnitPrice"))
+        val idxRefDetailID = cursor.getColumnIndexOrThrow("RefDetailID")
+        val idxRefDetailType = cursor.getColumnIndexOrThrow("RefDetailType")
+        val idxRefID = cursor.getColumnIndexOrThrow("RefID")
+        val idxInventoryItemID = cursor.getColumnIndexOrThrow("InventoryItemID")
+        val idxInventoryItemName = cursor.getColumnIndexOrThrow("InventoryItemName")
+        val idxUnitID = cursor.getColumnIndexOrThrow("UnitID")
+        val idxUnitName = cursor.getColumnIndexOrThrow("UnitName")
+        val idxQuantity = cursor.getColumnIndexOrThrow("Quantity")
+        val idxUnitPrice = cursor.getColumnIndexOrThrow("UnitPrice")
+        val idxAmount = cursor.getColumnIndexOrThrow("Amount")
+        val idxDescription = cursor.getColumnIndexOrThrow("Description")
+        val idxSortOrder = cursor.getColumnIndexOrThrow("SortOrder")
+        val idxCreatedDate = cursor.getColumnIndex("CreatedDate")
+        val idxCreatedBy = cursor.getColumnIndexOrThrow("CreatedBy")
+        val idxModifiedDate = cursor.getColumnIndex("ModifiedDate")
+        val idxModifiedBy = cursor.getColumnIndexOrThrow("ModifiedBy")
+
+        val quantityFloat = cursor.getFloat(idxQuantity)
+        val unitPriceFloat = cursor.getFloat(idxUnitPrice)
+
         return SAInvoiceDetail(
-            RefDetailID = cursor.getString(cursor.getColumnIndexOrThrow("RefDetailID")),
-            RefDetailType = cursor.getInt(cursor.getColumnIndexOrThrow("RefDetailType")),
-            RefID = cursor.getString(cursor.getColumnIndexOrThrow("RefID")),
-            InventoryItemID = cursor.getString(cursor.getColumnIndexOrThrow("InventoryItemID")),
-            InventoryItemName = cursor.getString(cursor.getColumnIndexOrThrow("InventoryItemName")),
-            UnitID = cursor.getString(cursor.getColumnIndexOrThrow("UnitID")),
-            UnitName = cursor.getString(cursor.getColumnIndexOrThrow("UnitName")),
-            Quantity = soLuong,
-            UnitPrice = donGia,
-            Amount = cursor.getFloat(cursor.getColumnIndexOrThrow("Amount")),
-            Description = cursor.getString(cursor.getColumnIndexOrThrow("Description")),
-            SortOrder = cursor.getInt(cursor.getColumnIndexOrThrow("SortOrder")),
-            CreatedDate = cursor.getLongOrNull("CreatedDate"),
-            CreatedBy = cursor.getString(cursor.getColumnIndexOrThrow("CreatedBy")),
-            ModifiedDate = cursor.getLongOrNull("ModifiedDate"),
-            ModifiedBy = cursor.getString(cursor.getColumnIndexOrThrow("ModifiedBy")),
-            quantity = soLuong.toInt(),
-            price = donGia.toDouble()
+            RefDetailID = cursor.getString(idxRefDetailID),
+            RefDetailType = cursor.getInt(idxRefDetailType),
+            RefID = cursor.getString(idxRefID),
+            InventoryItemID = cursor.getString(idxInventoryItemID),
+            InventoryItemName = cursor.getString(idxInventoryItemName),
+            UnitID = cursor.getString(idxUnitID),
+            UnitName = cursor.getString(idxUnitName),
+            Quantity = quantityFloat,
+            UnitPrice = unitPriceFloat,
+            Amount = cursor.getFloat(idxAmount),
+            Description = cursor.getString(idxDescription),
+            SortOrder = cursor.getInt(idxSortOrder),
+            CreatedDate = if (idxCreatedDate != -1 && !cursor.isNull(idxCreatedDate)) cursor.getLong(idxCreatedDate) else null,
+            CreatedBy = cursor.getString(idxCreatedBy),
+            ModifiedDate = if (idxModifiedDate != -1 && !cursor.isNull(idxModifiedDate)) cursor.getLong(idxModifiedDate) else null,
+            ModifiedBy = cursor.getString(idxModifiedBy),
+            quantity = quantityFloat.toInt(),
+            price = unitPriceFloat.toDouble()
         )
     }
 
-    // Chuyển đối tượng SAInvoiceDetail sang ContentValues để ghi db
     private fun detailToContentValues(detail: SAInvoiceDetail): ContentValues {
         return ContentValues().apply {
             put("RefDetailID", detail.RefDetailID)
@@ -135,37 +79,285 @@ class SAInvoiceDetailRepository(private val context: Context) {
             put("Amount", detail.Amount)
             put("Description", detail.Description)
             put("SortOrder", detail.SortOrder)
-            put("CreatedDate", detail.CreatedDate)
+            put("CreatedDate", detail.CreatedDate ?: System.currentTimeMillis())
             put("CreatedBy", detail.CreatedBy)
             put("ModifiedDate", detail.ModifiedDate)
             put("ModifiedBy", detail.ModifiedBy)
         }
     }
 
-    // Extension function để lấy Long? an toàn khi cột có thể null
-    private fun Cursor.getLongOrNull(columnName: String): Long? {
-        val index = getColumnIndex(columnName)
-        return if (index != -1 && !isNull(index)) getLong(index) else null
+    fun getAllDetails(): List<SAInvoiceDetail> {
+        val list = mutableListOf<SAInvoiceDetail>()
+        dbRead.use { db ->
+            val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail", null)
+            cursor.use {
+                if (it.moveToFirst()) {
+                    do {
+                        list.add(cursorToDetail(it))
+                    } while (it.moveToNext())
+                }
+            }
+        }
+        return list
+    }
+
+    fun getDetailsByRefID(refID: String): List<SAInvoiceDetail> {
+        val list = mutableListOf<SAInvoiceDetail>()
+        dbRead.use { db ->
+            val cursor = db.rawQuery("SELECT * FROM SAInvoiceDetail WHERE RefID = ?", arrayOf(refID))
+            cursor.use {
+                if (it.moveToFirst()) {
+                    do {
+                        list.add(cursorToDetail(it))
+                    } while (it.moveToNext())
+                }
+            }
+        }
+        return list
+    }
+
+    fun insertDetail(detail: SAInvoiceDetail): Long {
+        dbWrite.use { db ->
+            val detailWithUniqueID = detail.copy(
+                RefDetailID = UUID.randomUUID().toString(),
+                Amount = detail.Quantity * detail.UnitPrice // Đảm bảo Amount đúng
+            )
+            Log.d("InsertDetail", "Inserting RefDetailID = ${detailWithUniqueID.RefDetailID}, Amount = ${detailWithUniqueID.Amount}")
+            return db.insert("SAInvoiceDetail", null, detailToContentValues(detailWithUniqueID))
+        }
+    }
+
+    fun insertDetails(details: List<SAInvoiceDetail>) {
+        dbWrite.use { db ->
+            db.beginTransaction()
+            try {
+                for (detail in details) {
+                    val detailWithID = detail.copy(
+                        RefDetailID = UUID.randomUUID().toString(),
+                        Amount = detail.Quantity * detail.UnitPrice
+                    )
+                    db.insert("SAInvoiceDetail", null, detailToContentValues(detailWithID))
+                }
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
+            }
+        }
+    }
+
+    fun deleteByRefID(refID: String): Int {
+        dbWrite.use { db ->
+            return db.delete("SAInvoiceDetail", "RefID = ?", arrayOf(refID))
+        }
     }
 
 
-    // -------------- Các hàm tính tổng doanh thu theo khoảng thời gian --------------
 
-    // Hàm tính tổng Amount theo khoảng thời gian (timestamp millis bắt đầu và kết thúc)
-    private fun getTotalAmountBetween(startTime: Long, endTime: Long): Double {
-        val cursor = db.rawQuery(
-            "SELECT SUM(Amount) as Total FROM SAInvoiceDetail WHERE CreatedDate BETWEEN ? AND ?",
-            arrayOf(startTime.toString(), endTime.toString())
-        )
-        var total = 0.0
-        if (cursor.moveToFirst()) {
-            total = cursor.getDouble(cursor.getColumnIndexOrThrow("Total"))
+    fun updateDetail(detail: SAInvoiceDetail): Int {
+        dbWrite.use { db ->
+            return db.update(
+                "SAInvoiceDetail",
+                detailToContentValues(detail),
+                "RefDetailID = ?",
+                arrayOf(detail.RefDetailID)
+            )
         }
-        cursor.close()
+    }
+
+    fun getDetailsBetween(startTime: Long, endTime: Long): List<SAInvoiceDetail> {
+        val list = mutableListOf<SAInvoiceDetail>()
+        dbRead.use { db ->
+            val cursor = db.rawQuery(
+                "SELECT * FROM SAInvoiceDetail WHERE CreatedDate BETWEEN ? AND ?",
+                arrayOf(startTime.toString(), endTime.toString())
+            )
+            cursor.use {
+                if (it.moveToFirst()) {
+                    do {
+                        list.add(cursorToDetail(it))
+                    } while (it.moveToNext())
+                }
+            }
+        }
+        return list
+    }
+
+    fun getGroupedProductDetails(startTime: Long, endTime: Long): List<Triple<String, Float, Float>> {
+        val data = mutableListOf<Triple<String, Float, Float>>()
+        dbRead.use { db ->
+            val cursor = db.rawQuery(
+                """
+                SELECT InventoryItemName, SUM(Quantity) as total_quantity, SUM(Amount) as total_amount
+                FROM SAInvoiceDetail
+                WHERE CreatedDate BETWEEN ? AND ?
+                GROUP BY InventoryItemName
+                """,
+                arrayOf(startTime.toString(), endTime.toString())
+            )
+            cursor.use {
+                if (it.moveToFirst()) {
+                    do {
+                        val productName = it.getString(it.getColumnIndexOrThrow("InventoryItemName"))
+                        val totalQuantity = it.getFloat(it.getColumnIndexOrThrow("total_quantity"))
+                        val totalAmount = it.getFloat(it.getColumnIndexOrThrow("total_amount"))
+                        data.add(Triple(productName, totalQuantity, totalAmount))
+                        Log.d("SAInvoiceDetailRepo", "Grouped: $productName, Quantity: $totalQuantity, Amount: $totalAmount")
+                    } while (it.moveToNext())
+                }
+            }
+        }
+        return data
+    }
+
+    fun getPieChartData(startTime: Long, endTime: Long): List<Pair<String, Float>> {
+        val data = mutableListOf<Pair<String, Float>>()
+        dbRead.use { db ->
+            val cursor = db.rawQuery(
+                """
+                SELECT InventoryItemName, SUM(Amount) as total_amount
+                FROM SAInvoiceDetail
+                WHERE CreatedDate BETWEEN ? AND ?
+                GROUP BY InventoryItemName
+                """,
+                arrayOf(startTime.toString(), endTime.toString())
+            )
+            cursor.use {
+                if (it.moveToFirst()) {
+                    do {
+                        val productName = it.getString(it.getColumnIndexOrThrow("InventoryItemName"))
+                        val totalAmount = it.getFloat(it.getColumnIndexOrThrow("total_amount"))
+                        data.add(Pair(productName, totalAmount))
+                        Log.d("SAInvoiceDetailRepo", "PieChart: $productName, Amount: $totalAmount")
+                    } while (it.moveToNext())
+                }
+            }
+        }
+        return data
+    }
+
+    fun getTotalAmountBetween(startTime: Long, endTime: Long): Double {
+        var total = 0.0
+        Log.d("SAInvoiceDetailRepo", "Query total amount between $startTime and $endTime")
+        dbRead.use { db ->
+            val cursor = db.rawQuery(
+                "SELECT SUM(Amount) as Total FROM SAInvoiceDetail WHERE CreatedDate BETWEEN ? AND ?",
+                arrayOf(startTime.toString(), endTime.toString())
+            )
+            cursor.use {
+                if (it.moveToFirst()) {
+                    val totalIndex = it.getColumnIndexOrThrow("Total")
+                    total = if (!it.isNull(totalIndex)) it.getDouble(totalIndex) else 0.0
+                }
+            }
+        }
+        Log.d("SAInvoiceDetailRepo", "Total amount: $total")
         return total
     }
 
-    // Tổng doanh thu hôm nay
+    fun getLineChartData(timeType: String): List<Pair<String, Float>> {
+        val data = mutableListOf<Pair<String, Float>>()
+        dbRead.use { db ->
+            val query: String
+            val selectionArgs: Array<String>
+            val calendar = Calendar.getInstance()
+
+            when (timeType) {
+                "week" -> {
+                    // Set về thứ 2 tuần hiện tại
+                    calendar.firstDayOfWeek = Calendar.MONDAY
+                    calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    val startOfWeek = calendar.timeInMillis
+
+                    // Kết thúc là thứ 7 cùng tuần
+                    calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
+                    calendar.set(Calendar.HOUR_OF_DAY, 23)
+                    calendar.set(Calendar.MINUTE, 59)
+                    calendar.set(Calendar.SECOND, 59)
+                    calendar.set(Calendar.MILLISECOND, 999)
+                    val endOfWeek = calendar.timeInMillis
+
+                    query = """
+                    SELECT strftime('%Y-%m-%d', CreatedDate / 1000, 'unixepoch') as period, 
+                           SUM(Amount) as total_amount
+                    FROM SAInvoiceDetail
+                    WHERE CreatedDate BETWEEN ? AND ?
+                    GROUP BY period
+                    HAVING total_amount > 0
+                    ORDER BY period
+                """
+                    selectionArgs = arrayOf(startOfWeek.toString(), endOfWeek.toString())
+                }
+                "month" -> {
+                    // Đầu tháng
+                    calendar.set(Calendar.DAY_OF_MONTH, 1)
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    val startOfMonth = calendar.timeInMillis
+
+                    // Cuối tháng
+                    calendar.add(Calendar.MONTH, 1)
+                    calendar.add(Calendar.MILLISECOND, -1)
+                    val endOfMonth = calendar.timeInMillis
+
+                    query = """
+                    SELECT strftime('%Y-%m-%d', CreatedDate / 1000, 'unixepoch') as period, 
+                           SUM(Amount) as total_amount
+                    FROM SAInvoiceDetail
+                    WHERE CreatedDate BETWEEN ? AND ?
+                    GROUP BY period
+                    HAVING total_amount > 0
+                    ORDER BY period
+                """
+                    selectionArgs = arrayOf(startOfMonth.toString(), endOfMonth.toString())
+                }
+                else -> { // year
+                    calendar.set(Calendar.DAY_OF_YEAR, 1)
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    val startOfYear = calendar.timeInMillis
+
+                    calendar.add(Calendar.YEAR, 1)
+                    calendar.add(Calendar.MILLISECOND, -1)
+                    val endOfYear = calendar.timeInMillis
+
+                    query = """
+                    SELECT strftime('%Y-%m', CreatedDate / 1000, 'unixepoch') as period, 
+                           SUM(Amount) as total_amount
+                    FROM SAInvoiceDetail
+                    WHERE CreatedDate BETWEEN ? AND ?
+                    GROUP BY period
+                    HAVING total_amount > 0
+                    ORDER BY period
+                """
+                    selectionArgs = arrayOf(startOfYear.toString(), endOfYear.toString())
+                }
+            }
+
+            val cursor = db.rawQuery(query, selectionArgs)
+            cursor.use {
+                if (it.moveToFirst()) {
+                    do {
+                        val period = it.getString(it.getColumnIndexOrThrow("period"))
+                        val totalAmount = it.getFloat(it.getColumnIndexOrThrow("total_amount"))
+                        data.add(Pair(period, totalAmount))
+                        Log.d("SAInvoiceDetailRepo", "LineChart: $period, Amount: $totalAmount")
+                    } while (it.moveToNext())
+                }
+            }
+        }
+        return data
+    }
+
+
+
     fun getTotalAmountToday(): Double {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -177,34 +369,36 @@ class SAInvoiceDetailRepository(private val context: Context) {
         return getTotalAmountBetween(startOfDay, endOfDay)
     }
 
-    // Tổng doanh thu hôm qua
     fun getTotalAmountYesterday(): Double {
         val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DATE, -1)
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
+
+        calendar.add(Calendar.DAY_OF_MONTH, -1)
         val startOfYesterday = calendar.timeInMillis
-        val endOfYesterday = startOfYesterday + 24 * 60 * 60 * 1000 - 1
+
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+        val endOfYesterday = calendar.timeInMillis - 1
+
         return getTotalAmountBetween(startOfYesterday, endOfYesterday)
     }
 
-    // Tổng doanh thu tuần này (tính từ thứ 2 đầu tuần)
+
     fun getTotalAmountThisWeek(): Double {
         val calendar = Calendar.getInstance()
+        calendar.firstDayOfWeek = Calendar.MONDAY
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
-        calendar.firstDayOfWeek = Calendar.MONDAY
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         val startOfWeek = calendar.timeInMillis
         val endOfWeek = startOfWeek + 7 * 24 * 60 * 60 * 1000 - 1
         return getTotalAmountBetween(startOfWeek, endOfWeek)
     }
 
-    // Tổng doanh thu tháng này
     fun getTotalAmountThisMonth(): Double {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_MONTH, 1)
@@ -218,7 +412,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
         return getTotalAmountBetween(startOfMonth, endOfMonth)
     }
 
-    // Tổng doanh thu năm nay
     fun getTotalAmountThisYear(): Double {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.DAY_OF_YEAR, 1)
@@ -231,30 +424,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
         val endOfYear = calendar.timeInMillis - 1
         return getTotalAmountBetween(startOfYear, endOfYear)
     }
-
-    fun saveInvoiceDetailsToDatabase(details: List<SAInvoiceDetail>) {
-        val repository = SAInvoiceDetailRepository(context)
-        repository.insertDetails(details)
-    }
-
-    fun getDetailsBetween(startTime: Long, endTime: Long): List<SAInvoiceDetail> {
-        val list = mutableListOf<SAInvoiceDetail>()
-        val cursor = db.rawQuery(
-            "SELECT * FROM SAInvoiceDetail WHERE CreatedDate BETWEEN ? AND ?",
-            arrayOf(startTime.toString(), endTime.toString())
-        )
-        if (cursor.moveToFirst()) {
-            do {
-                list.add(cursorToDetail(cursor))
-            } while (cursor.moveToNext())
-        }
-        cursor.close()
-        return list
-    }
-
-
-
-
 
 
 }

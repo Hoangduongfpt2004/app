@@ -15,6 +15,9 @@
         android:theme="@style/Theme.AppQuanLy"
         tools:targetApi="31">
         <activity
+            android:name=".Chart.ChartActivity"
+            android:exported="false" />
+        <activity
             android:name=".Report.ChartDetailActivity"
             android:exported="false" />
         <activity

@@ -21,7 +21,6 @@ class SaleePresenter(
     private val invoiceRepo = SAInvoiceRepository(context)
     private val invoiceDetailRepo = SAInvoiceDetailRepository(context)
     private val scopeMain = CoroutineScope(Dispatchers.Main)
-    private val scopeIO = CoroutineScope(Dispatchers.IO)
 
     override fun onHintClicked() {
         view.showMenu()
@@ -57,7 +56,6 @@ class SaleePresenter(
                 return@launch
             }
 
-            // Lấy chi tiết cho từng hóa đơn
             val invoicesWithDetails = withContext(Dispatchers.IO) {
                 invoices.map { invoice ->
                     val details = invoiceDetailRepo.getDetailsByRefID(invoice.refId)
@@ -71,7 +69,9 @@ class SaleePresenter(
 
     override fun saveInvoiceItem(item: SAInvoiceItem) {
         scopeMain.launch {
-            invoiceRepo.insertInvoice(item)
+            withContext(Dispatchers.IO) {
+                invoiceRepo.insertInvoice(item)
+            }
             loadInvoiceItems()
         }
     }
@@ -84,8 +84,8 @@ class SaleePresenter(
         invoiceDetails: List<SAInvoiceDetail>
     ) {
         scopeMain.launch {
+            val currentTime = System.currentTimeMillis()
             val refId = invoiceItems.firstOrNull()?.refId ?: UUID.randomUUID().toString()
-            val refDate = System.currentTimeMillis()
             val amount = tongTien.toDoubleOrNull() ?: 0.0
             val numberOfPeople = soKhach.toIntOrNull() ?: 0
 
@@ -93,7 +93,7 @@ class SaleePresenter(
                 refId = refId,
                 refType = 1,
                 refNo = "HD001", // Có thể sinh số hóa đơn tùy ý
-                refDate = refDate,
+                refDate = currentTime,
                 amount = amount,
                 returnAmount = 0.0,
                 receiveAmount = amount,
@@ -102,15 +102,21 @@ class SaleePresenter(
                 paymentStatus = 0,
                 numberOfPeople = numberOfPeople,
                 tableName = soBan,
-                createdDate = refDate,
+                createdDate = currentTime,
                 createdBy = "",
                 modifiedDate = null,
                 modifiedBy = null
             )
 
-            invoiceRepo.insertInvoice(mainInvoice)
-            invoiceItems.forEach { invoiceRepo.insertInvoice(it.copy(refId = refId)) }
-            invoiceDetails.forEach { invoiceDetailRepo.insertDetail(it.copy(RefID = refId)) }
+            withContext(Dispatchers.IO) {
+                invoiceRepo.insertInvoice(mainInvoice)
+                invoiceItems.forEach { invoiceRepo.insertInvoice(it.copy(refId = refId)) }
+                val now = System.currentTimeMillis()
+                invoiceDetails.forEach {
+                    invoiceDetailRepo.insertDetail(it.copy(RefID = refId, CreatedDate = now))
+                }
+
+            }
 
             view.showMessage("Lưu hóa đơn thành công!")
             loadInvoiceItems()
@@ -124,8 +130,8 @@ class SaleePresenter(
         details: List<SAInvoiceDetail>
     ) {
         scopeMain.launch {
+            val currentTime = System.currentTimeMillis()
             val refId = UUID.randomUUID().toString()
-            val refDate = System.currentTimeMillis()
             val amount = tongTien.toDoubleOrNull() ?: 0.0
             val numberOfPeople = soKhach.toIntOrNull() ?: 0
 
@@ -133,7 +139,7 @@ class SaleePresenter(
                 refId = refId,
                 refType = 1,
                 refNo = "HD001", // Có thể tùy biến số hóa đơn
-                refDate = refDate,
+                refDate = currentTime,
                 amount = amount,
                 returnAmount = 0.0,
                 receiveAmount = amount,
@@ -142,14 +148,16 @@ class SaleePresenter(
                 paymentStatus = 0,
                 numberOfPeople = numberOfPeople,
                 tableName = soBan,
-                createdDate = refDate,
+                createdDate = currentTime,
                 createdBy = "",
                 modifiedDate = null,
                 modifiedBy = null
             )
 
-            invoiceRepo.insertInvoice(mainInvoice)
-            details.forEach { invoiceDetailRepo.insertDetail(it.copy(RefID = refId)) }
+            withContext(Dispatchers.IO) {
+                invoiceRepo.insertInvoice(mainInvoice)
+                details.forEach { invoiceDetailRepo.insertDetail(it.copy(RefID = refId)) }
+            }
 
             view.showMessage("Lưu hóa đơn thành công!")
             loadInvoiceItems()

@@ -106,8 +106,6 @@ class ChooseDishPresenter(
         onCollectMoneyClick()
     }
 
-
-
     override fun getSelectedInvoiceItems(): List<SAInvoiceItem> {
         return getSelectedItems().map {
             val amount = (it.Price ?: 0f).toDouble() * it.quantity
@@ -137,6 +135,7 @@ class ChooseDishPresenter(
     override fun getRefId(): String = refID
 
     override fun getSelectedInvoiceDetails(): List<SAInvoiceDetail> {
+        val currentTime = System.currentTimeMillis()
         return getSelectedItems().mapIndexed { index, item ->
             val quantity = item.quantity.toFloat()
             val price = item.Price ?: 0f
@@ -155,14 +154,13 @@ class ChooseDishPresenter(
                 Amount = amount,
                 Description = "",
                 SortOrder = index + 1,
-                CreatedDate = System.currentTimeMillis(),
+                CreatedDate = currentTime,
                 CreatedBy = "",
                 ModifiedDate = null,
                 ModifiedBy = ""
             )
         }
     }
-
 
     fun convertToInvoiceItems(details: List<SAInvoiceDetail>): List<SAInvoiceItem> {
         val groupedMap = mutableMapOf<String, SAInvoiceItem>()
@@ -204,15 +202,16 @@ class ChooseDishPresenter(
         return groupedMap.values.toList()
     }
 
-
     //  Hàm đã được sửa lại đúng cách
     fun saveInvoice(soBan: String, soKhach: String, tongTien: String, details: List<SAInvoiceDetail>) {
         scope.launch {
+            val currentTime = System.currentTimeMillis()
+
             val invoice = SAInvoiceItem(
                 refId = refID,
                 refType = 1,
                 refNo = "HD001",
-                refDate = System.currentTimeMillis(),
+                refDate = currentTime,
                 amount = tongTien.toDoubleOrNull() ?: 0.0,
                 returnAmount = 0.0,
                 receiveAmount = tongTien.toDoubleOrNull() ?: 0.0,
@@ -221,18 +220,22 @@ class ChooseDishPresenter(
                 paymentStatus = 0,
                 numberOfPeople = soKhach.toIntOrNull() ?: 0,
                 tableName = soBan,
-                createdDate = System.currentTimeMillis(),
+                createdDate = currentTime,
                 createdBy = "",
                 modifiedDate = null,
                 modifiedBy = null
             )
 
+            val updatedDetails = details.map { detail ->
+                detail.copy(
+                    RefID = invoice.refId,
+                    CreatedDate = currentTime,
+                    ModifiedDate = null
+                )
+            }
+
             val success = invoiceRepo.insertInvoice(invoice)
             if (success) {
-                // Gán refId cho từng detail (trong trường hợp refId mới)
-                val updatedDetails = details.map {
-                    it.copy(RefID = invoice.refId)
-                }
                 invoiceDetailRepo.insertDetails(updatedDetails)
                 onInvoiceSavedSuccess()
             } else {
@@ -255,11 +258,12 @@ class ChooseDishPresenter(
         view.navigateToSaleeScreen(invoiceItems)
 
         val totalAmount = invoiceItems.sumOf { it.amount }
+        val currentTime = System.currentTimeMillis()
         val invoice = SAInvoiceItem(
             refId = refID,
             refType = 1,
             refNo = "HD001",
-            refDate = System.currentTimeMillis(),
+            refDate = currentTime,
             amount = totalAmount,
             returnAmount = 0.0,
             receiveAmount = totalAmount,
@@ -268,7 +272,7 @@ class ChooseDishPresenter(
             paymentStatus = 0,
             numberOfPeople = numberOfPeople,
             tableName = tableName,
-            createdDate = System.currentTimeMillis(),
+            createdDate = currentTime,
             createdBy = "",
             modifiedDate = null,
             modifiedBy = null
@@ -286,10 +290,10 @@ class ChooseDishPresenter(
     }
 
     override fun onInvoiceSavedSuccess() {
-        view.showMessage("Lưu hóa đơn thành công!")
+        view.showMessage("Hóa đơn đã lưu thành công!")
     }
 
-    override fun onInvoiceSavedFailed(error: String) {
-        view.showMessage("Lưu hóa đơn thất bại: $error")
+    override fun onInvoiceSavedFailed(msg: String) {
+        view.showMessage("Lỗi: $msg")
     }
 }

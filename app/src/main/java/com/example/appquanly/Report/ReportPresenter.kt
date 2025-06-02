@@ -23,10 +23,11 @@ class ReportPresenter(
     override fun loadToday() {
         presenterScope.launch {
             try {
-                val total = withContext(Dispatchers.IO) { repository.getTotalAmountToday() }
+                val total = withContext(Dispatchers.IO) {
+                    repository.getTotalAmountToday()
+                }
                 view?.showTotalToday(total)
             } catch (e: Exception) {
-                e.printStackTrace()
                 view?.showError("Lỗi tải dữ liệu hôm nay")
             }
         }
@@ -35,10 +36,11 @@ class ReportPresenter(
     override fun loadYesterday() {
         presenterScope.launch {
             try {
-                val total = withContext(Dispatchers.IO) { repository.getTotalAmountYesterday() }
+                val total = withContext(Dispatchers.IO) {
+                    repository.getTotalAmountYesterday()
+                }
                 view?.showTotalYesterday(total)
             } catch (e: Exception) {
-                e.printStackTrace()
                 view?.showError("Lỗi tải dữ liệu hôm qua")
             }
         }
@@ -47,10 +49,11 @@ class ReportPresenter(
     override fun loadThisWeek() {
         presenterScope.launch {
             try {
-                val total = withContext(Dispatchers.IO) { repository.getTotalAmountThisWeek() }
+                val total = withContext(Dispatchers.IO) {
+                    repository.getTotalAmountThisWeek()
+                }
                 view?.showTotalThisWeek(total)
             } catch (e: Exception) {
-                e.printStackTrace()
                 view?.showError("Lỗi tải dữ liệu tuần này")
             }
         }
@@ -59,10 +62,11 @@ class ReportPresenter(
     override fun loadThisMonth() {
         presenterScope.launch {
             try {
-                val total = withContext(Dispatchers.IO) { repository.getTotalAmountThisMonth() }
+                val total = withContext(Dispatchers.IO) {
+                    repository.getTotalAmountThisMonth()
+                }
                 view?.showTotalThisMonth(total)
             } catch (e: Exception) {
-                e.printStackTrace()
                 view?.showError("Lỗi tải dữ liệu tháng này")
             }
         }
@@ -71,10 +75,11 @@ class ReportPresenter(
     override fun loadThisYear() {
         presenterScope.launch {
             try {
-                val total = withContext(Dispatchers.IO) { repository.getTotalAmountThisYear() }
+                val total = withContext(Dispatchers.IO) {
+                    repository.getTotalAmountThisYear()
+                }
                 view?.showTotalThisYear(total)
             } catch (e: Exception) {
-                e.printStackTrace()
                 view?.showError("Lỗi tải dữ liệu năm nay")
             }
         }
