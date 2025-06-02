@@ -93,7 +93,7 @@ class ProductDetailAdapter(
                     if (date != null) {
                         val cal = Calendar.getInstance()
                         cal.time = date
-                        return "Tháng" +  cal.get(Calendar.DAY_OF_MONTH).toString()
+                        return " Tháng "  +  cal.get(Calendar.DAY_OF_MONTH).toString()
                     } else period
                 } catch (e: Exception) {
                     period
