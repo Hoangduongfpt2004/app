@@ -107,6 +107,8 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             finish()
         }
 
+
+
         edit_store.setOnClickListener {
             val selectedDetails = presenter.getSelectedInvoiceDetails()
             val soBan = btnSetting.text.toString()

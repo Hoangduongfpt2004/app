@@ -49,5 +49,7 @@
     <color name="colorCircleLow">#4CAF50</color> <!-- xanh lá nhạt -->
     <color name="colorCircleMedium">#FFC107</color> <!-- vàng cam -->
     <color name="colorCircleHigh">#F44336</color> <!-- đỏ -->
+    <color name="gray">#CCCCCC</color>
+
 
 </resources>

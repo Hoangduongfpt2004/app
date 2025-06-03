@@ -4,14 +4,16 @@ interface ChartContract {
     interface View {
         fun showPieChartData(data: List<Pair<String, Float>>, colors: List<Int>)
         fun showLineChartData(data: List<Pair<String, Float>>)
-        fun showProductDetails(details: List<Pair<String, Float>>, colors: List<Int>) // Thêm colors
+        fun showProductDetails(details: List<Pair<String, Float>>, colors: List<Int>)
         fun showTitleAndDate(title: String, date: String)
         fun showTotalAmount(amount: Double)
         fun showError(message: String)
+        fun showInvoiceDetails(details: List<Triple<String, Int, Float>>)
     }
 
     interface Presenter {
         fun loadChartData(timeType: String)
+        fun loadInvoiceDetails(startTime: Long, endTime: Long)
         fun onDestroy()
     }
 }

@@ -13,9 +13,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class ProductDetailAdapter(
-    private var dataList: List<Pair<String, Float>>,
-    private val timeType: String, // "today", "yesterday", "week", "month", "year"
-    private var colors: List<Int> // Danh sách màu sắc
+    private var dataList: List<Pair<String, Float>> = emptyList(),
+    private val timeType: String,
+    private var colors: List<Int> = emptyList(),
+    private val onItemClick: (String, String) -> Unit
 ) : RecyclerView.Adapter<ProductDetailAdapter.ViewHolder>() {
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,85 +33,60 @@ class ProductDetailAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val data = dataList[position]
-        val color = if (position < colors.size) colors[position] else ContextCompat.getColor(holder.itemView.context, R.color.colorPrimary)
+        val data = dataList.getOrNull(position)
+        val color = colors.getOrNull(position) ?: ContextCompat.getColor(holder.itemView.context, R.color.colorPrimary)
 
-        val label = try {
-            convertPeriodToLabel(timeType, data.first)
-        } catch (e: Exception) {
-            Log.e("ProductDetailAdapter", "Error parsing label: ${data.first}", e)
-            data.first
-        }
+        val label = data?.first ?: "N/A"
 
         holder.tvIndex.text = (position + 1).toString()
         holder.tvPeriod.text = label
-        holder.tvAmount.text = String.format("%,.0fđ", data.second)
-        holder.tvQuantity.visibility = View.GONE // Ẩn số lượng vì không cần thiết
+        holder.tvAmount.text = if (data != null) String.format("%,.0fđ", data.second) else "0đ"
+        holder.tvQuantity.visibility = View.GONE
 
         val background = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
-            setColor(color) // Sử dụng màu từ danh sách colors
+            setColor(color)
             setSize(24, 24)
         }
         holder.tvIndex.background = background
         holder.tvIndex.setTextColor(ContextCompat.getColor(holder.itemView.context, android.R.color.white))
+
+        holder.itemView.setOnClickListener {
+            onItemClick(label, timeType)
+        }
     }
 
     override fun getItemCount(): Int = dataList.size
 
-    fun updateData(newList: List<Pair<String, Float>>, newColors: List<Int>) {
-        dataList = newList
-        colors = newColors
-        notifyDataSetChanged()
-    }
+    fun updateData(newList: List<Pair<String, Float>>?, newColors: List<Int>?) {
+        val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1 // Tháng hiện tại (6)
 
-    private fun convertPeriodToLabel(timeType: String, period: String): String {
-        return when (timeType) {
-            "today", "yesterday" -> period // Hiển thị tên sản phẩm cho today/yesterday
-            "week" -> {
-                try {
-                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    val date = sdf.parse(period)
-                    val cal = Calendar.getInstance()
-                    cal.time = date!!
-                    when (cal.get(Calendar.DAY_OF_WEEK)) {
-                        Calendar.MONDAY -> "T2"
-                        Calendar.TUESDAY -> "T3"
-                        Calendar.WEDNESDAY -> "T4"
-                        Calendar.THURSDAY -> "T5"
-                        Calendar.FRIDAY -> "T6"
-                        Calendar.SATURDAY -> "T7"
-                        else -> period
-                    }
-                } catch (e: Exception) {
-                    period
+        // Định dạng lại nhãn dựa trên timeType
+        val formattedList = newList?.map { (period, amount) ->
+            val formattedPeriod = when (timeType) {
+                "week", "last_week" -> {
+                    val day = period.split("-")[2].substring(0, 2)
+                    val dayMap = mapOf(
+                        "01" to "Thứ 2", "02" to "Thứ 2", "03" to "Thứ 3", "04" to "Thứ 4",
+                        "05" to "Thứ 5", "06" to "Thứ 6", "07" to "Thứ 7"
+                    )
+                    dayMap[day] ?: period
                 }
-            }
-            "month" -> {
-                try {
-                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    val date = sdf.parse(period)
-                    if (date != null) {
-                        val cal = Calendar.getInstance()
-                        cal.time = date
-                        return " Tháng "  +  cal.get(Calendar.DAY_OF_MONTH).toString()
-                    } else period
-                } catch (e: Exception) {
-                    period
+                "month", "last_month" -> {
+                    val day = period.split("-")[2]
+                    "Ngày $day"
                 }
-            }
-            "year" -> {
-                try {
-                    val parts = period.split("-")
-                    if (parts.size == 2) {
-                        val month = parts[1].toInt()
-                        return "Tháng $month"
-                    } else period
-                } catch (e: Exception) {
-                    period
+                "year", "last_year" -> {
+                    val month = period.replace("Tháng ", "").toIntOrNull() ?: 1
+                    if (month <= currentMonth || amount > 0) period else null
                 }
+                else -> period
             }
-            else -> period
-        }
+            if (formattedPeriod != null) Pair(formattedPeriod, amount) else null
+        }?.filterNotNull() ?: emptyList()
+
+        dataList = formattedList
+        colors = newColors ?: emptyList()
+        notifyDataSetChanged()
     }
 }

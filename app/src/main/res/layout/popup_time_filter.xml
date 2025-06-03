@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:background="#F0ECEC"
+    android:orientation="vertical"
+    android:padding="0dp">
+
+    <!-- Tiêu đề với nền xanh tràn hết viền -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thời gian"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:background="@color/blue"
+        android:padding="12dp" />
+
+    <!-- Danh sách các mục với padding và gạch ngang -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/item_nearby"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Gần đây"
+            android:textColor="@color/black"
+            android:drawableEnd="@drawable/ic_check_filter"
+            android:drawablePadding="1dp"
+            android:paddingVertical="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+        <TextView
+            android:id="@+id/item_yesterday"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hôm qua"
+            android:textColor="@color/black"
+            android:paddingVertical="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+        <TextView
+            android:id="@+id/item_this_week"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tuần này"
+            android:textColor="@color/black"
+            android:drawablePadding="8dp"
+            android:paddingVertical="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+        <TextView
+            android:id="@+id/item_this_month"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tháng này"
+            android:textColor="@color/black"
+            android:drawablePadding="8dp"
+            android:paddingVertical="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+        <TextView
+            android:id="@+id/item_this_year"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Năm nay"
+            android:textColor="@color/black"
+            android:drawablePadding="8dp"
+            android:paddingVertical="10dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#D7D3D3" />
+
+        <TextView
+            android:id="@+id/item_other"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Khác"
+            android:textColor="@color/black"
+            android:drawablePadding="8dp"
+            android:paddingVertical="10dp" />
+    </LinearLayout>
+
+    <!-- Nút Close với padding -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Thoát"
+        android:textColor="@android:color/white"
+        android:background="@color/blue"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:padding="8dp" />
+</LinearLayout>

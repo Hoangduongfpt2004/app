@@ -2,7 +2,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/reportDetailLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,7 +9,7 @@
 
     <!-- Toolbar chuẩn Material -->
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar_back"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/blue"
@@ -19,52 +18,122 @@
         app:title="Doanh thu theo mặt hàng"
         app:titleTextColor="@android:color/white" />
 
-    <!-- Tiêu đề thống kê (tvTitle bị thiếu trước đó) -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Thống kê hôm nay"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
-
-    <!-- Ngày thống kê -->
-    <TextView
-        android:id="@+id/tvDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="02/06/2025"
-        android:textSize="16sp"
-        android:textColor="#555555"
-        android:layout_margin="16dp" />
-
-    <!-- Biểu đồ tròn -->
-    <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/pieChart"
+    <!-- Nội dung chính (có dữ liệu) -->
+    <LinearLayout
+        android:id="@+id/mainContentLayout"
         android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="1dp">
 
-    <!-- Biểu đồ đường -->
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/lineChart"
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone" />
+        <LinearLayout
+            android:id="@+id/timeFilterLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#D7D3D3"
+            android:gravity="center_vertical"
+            android:paddingVertical="12dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-    <!-- Danh sách sản phẩm -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewDetail"
+            <TextView
+                android:id="@+id/txtTimeLabel"
+                android:text="Thời gian"
+                style="@style/App_txtTimeLabel" />
+
+            <TextView
+                android:id="@+id/txtTimeFilter"
+                android:text="Gần đây"
+                android:drawableEnd="@drawable/ic_arrow_drop_down"
+                android:drawablePadding="4dp"
+                style="@style/App_txtTimeFilter" />
+        </LinearLayout>
+
+
+
+
+        <!-- Tiêu đề thống kê -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thống kê hôm nay"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"/>
+
+        <!-- Ngày thống kê -->
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="02/06/2025"
+            android:textSize="16sp"
+            android:textColor="#555555"
+            android:layout_margin="16dp" />
+
+        <!-- Biểu đồ tròn -->
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart"
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Biểu đồ đường -->
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChart"
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" />
+
+        <!-- Danh sách sản phẩm -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewDetail"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="16dp"
+            android:scrollbars="vertical" />
+    </LinearLayout>
+
+    <!-- Giao diện "Không có dữ liệu" -->
+    <LinearLayout
+        android:id="@+id/noRevenueLayout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="#F0ECEC"
         android:padding="16dp"
-        android:scrollbars="vertical" />
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BÁO CÁO DOANH THU"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:src="@drawable/baseline_insert_chart_outlined_24"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Báo cáo doanh thu không có số liệu"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:layout_marginBottom="32dp" />
+    </LinearLayout>
 </LinearLayout>

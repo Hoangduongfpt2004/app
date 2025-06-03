@@ -6,8 +6,6 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import java.text.SimpleDateFormat
 import java.util.*
 
-
-
 class ChartPresenter(
     private val view: ChartContract.View,
     private val repository: SAInvoiceDetailRepository
@@ -24,7 +22,7 @@ class ChartPresenter(
                 val end = start + DAY_IN_MILLIS - 1
                 val title = "Thống kê hôm nay"
                 val dateText = sdf.format(calendar.time)
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             "yesterday" -> {
                 calendar.add(Calendar.DAY_OF_YEAR, -1)
@@ -33,7 +31,7 @@ class ChartPresenter(
                 val end = start + DAY_IN_MILLIS - 1
                 val title = "Thống kê hôm qua"
                 val dateText = sdf.format(calendar.time)
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             "week" -> {
                 calendar.firstDayOfWeek = Calendar.MONDAY
@@ -49,7 +47,7 @@ class ChartPresenter(
 
                 val title = "Thống kê tuần này"
                 val dateText = "Từ $startText đến $endText"
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             "last_week" -> {
                 calendar.firstDayOfWeek = Calendar.MONDAY
@@ -66,7 +64,7 @@ class ChartPresenter(
 
                 val title = "Thống kê tuần trước"
                 val dateText = "Từ $startText đến $endText"
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             "month" -> {
                 calendar.set(Calendar.DAY_OF_MONTH, 1)
@@ -83,7 +81,7 @@ class ChartPresenter(
 
                 val title = "Thống kê tháng này"
                 val dateText = "Từ $startText đến $endText"
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             "last_month" -> {
                 calendar.add(Calendar.MONTH, -1)
@@ -100,7 +98,7 @@ class ChartPresenter(
 
                 val title = "Thống kê tháng trước"
                 val dateText = "Từ $startText đến $endText"
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             "year" -> {
                 calendar.set(Calendar.DAY_OF_YEAR, 1)
@@ -116,7 +114,7 @@ class ChartPresenter(
 
                 val title = "Thống kê năm nay"
                 val dateText = "Từ $startText đến $endText"
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             "last_year" -> {
                 calendar.add(Calendar.YEAR, -1)
@@ -133,7 +131,7 @@ class ChartPresenter(
 
                 val title = "Thống kê năm trước"
                 val dateText = "Từ $startText đến $endText"
-                Quadruple<Long, Long, String, String>(start, end, title, dateText)
+                Quadruple(start, end, title, dateText)
             }
             else -> {
                 view.showError("Loại thời gian không hợp lệ")
@@ -166,15 +164,26 @@ class ChartPresenter(
                 view.showError("Không có dữ liệu để hiển thị biểu đồ")
             } else {
                 view.showPieChartData(pieData, colors)
-                view.showProductDetails(pieData, colors) // Truyền colors cho today/yesterday
+                view.showProductDetails(pieData, colors)
             }
         } else {
             if (lineData.isEmpty()) {
                 view.showError("Không có dữ liệu để hiển thị biểu đồ đường")
             } else {
                 view.showLineChartData(lineData)
-                view.showProductDetails(lineData, colors) // Truyền colors cho week/month/year
+                view.showProductDetails(lineData, colors)
             }
+        }
+    }
+
+    override fun loadInvoiceDetails(startTime: Long, endTime: Long) {
+        val details = repository.getDetailsBetween(startTime, endTime).map {
+            Triple(it.InventoryItemName, it.quantity, it.Amount)
+        }
+        if (details.isEmpty()) {
+            view.showError("Không có chi tiết doanh thu cho ngày này")
+        } else {
+            view.showInvoiceDetails(details)
         }
     }
 

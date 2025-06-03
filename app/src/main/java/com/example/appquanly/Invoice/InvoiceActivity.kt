@@ -101,7 +101,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
 
         // Hiển thị tổng tiền nếu có truyền vào
         if (!tongTienStr.isNullOrEmpty()) {
-            tvTongTien.text = " $tongTienStr đ"
+            tvTongTien.text = " $tongTienStr"
         }
 
         val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time)
@@ -134,6 +134,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         // Dòng kẻ đen dưới header
         addSolidDivider()
 
+
         // Hiển thị các dòng sản phẩm
         details.forEach { detail ->
             val amount = detail.Quantity * detail.UnitPrice
@@ -141,7 +142,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
             val row = TableRow(this).apply {
                 listOf(
                     detail.InventoryItemName,
-                    detail.Quantity.toString(),
+                    detail.Quantity.toInt().toString(),
                     String.format("%,.0f", detail.UnitPrice),
                     String.format("%,.0f", amount)
                 ).forEach {
@@ -160,7 +161,8 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
             totalAmount += amount
         }
 
-        showTotalAmount(totalAmount)
+        tvTienKhachDua.text = String.format("%,.0f", totalAmount)
+
     }
 
     private fun addSolidDivider() {
@@ -179,11 +181,15 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
             layoutParams = TableLayout.LayoutParams(
                 TableLayout.LayoutParams.MATCH_PARENT,
                 2
-            )
+            ).apply {
+                topMargin = 8
+                bottomMargin = 8
+            }
             background = ContextCompat.getDrawable(context, R.drawable.dashed_line)
         }
         tableLayout.addView(line)
     }
+
 
     private fun generateNextInvoiceNumber(): String {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)

@@ -263,7 +263,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
 
             when (timeType) {
                 "week" -> {
-                    // Set về thứ 2 tuần hiện tại
                     calendar.firstDayOfWeek = Calendar.MONDAY
                     calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
                     calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -272,7 +271,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     calendar.set(Calendar.MILLISECOND, 0)
                     val startOfWeek = calendar.timeInMillis
 
-                    // Kết thúc là thứ 7 cùng tuần
                     calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY)
                     calendar.set(Calendar.HOUR_OF_DAY, 23)
                     calendar.set(Calendar.MINUTE, 59)
@@ -286,13 +284,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     FROM SAInvoiceDetail
                     WHERE CreatedDate BETWEEN ? AND ?
                     GROUP BY period
-                    HAVING total_amount > 0
                     ORDER BY period
                 """
                     selectionArgs = arrayOf(startOfWeek.toString(), endOfWeek.toString())
                 }
                 "month" -> {
-                    // Đầu tháng
                     calendar.set(Calendar.DAY_OF_MONTH, 1)
                     calendar.set(Calendar.HOUR_OF_DAY, 0)
                     calendar.set(Calendar.MINUTE, 0)
@@ -300,7 +296,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     calendar.set(Calendar.MILLISECOND, 0)
                     val startOfMonth = calendar.timeInMillis
 
-                    // Cuối tháng
                     calendar.add(Calendar.MONTH, 1)
                     calendar.add(Calendar.MILLISECOND, -1)
                     val endOfMonth = calendar.timeInMillis
@@ -311,7 +306,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     FROM SAInvoiceDetail
                     WHERE CreatedDate BETWEEN ? AND ?
                     GROUP BY period
-                    HAVING total_amount > 0
                     ORDER BY period
                 """
                     selectionArgs = arrayOf(startOfMonth.toString(), endOfMonth.toString())
@@ -334,22 +328,54 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     FROM SAInvoiceDetail
                     WHERE CreatedDate BETWEEN ? AND ?
                     GROUP BY period
-                    HAVING total_amount > 0
                     ORDER BY period
                 """
                     selectionArgs = arrayOf(startOfYear.toString(), endOfYear.toString())
                 }
             }
 
-            val cursor = db.rawQuery(query, selectionArgs)
-            cursor.use {
-                if (it.moveToFirst()) {
-                    do {
-                        val period = it.getString(it.getColumnIndexOrThrow("period"))
-                        val totalAmount = it.getFloat(it.getColumnIndexOrThrow("total_amount"))
-                        data.add(Pair(period, totalAmount))
-                        Log.d("SAInvoiceDetailRepo", "LineChart: $period, Amount: $totalAmount")
-                    } while (it.moveToNext())
+            val monthData = mutableMapOf<Int, Float>()
+            dbRead.use { db ->
+                val cursor = db.rawQuery(query, selectionArgs)
+                cursor.use {
+                    if (it.moveToFirst()) {
+                        do {
+                            val period = it.getString(it.getColumnIndexOrThrow("period"))
+                            val totalAmount = it.getFloat(it.getColumnIndexOrThrow("total_amount"))
+                            val month = period.split("-")[1].toInt()
+                            monthData[month] = totalAmount
+                            Log.d("SAInvoiceDetailRepo", "LineChart: Month $month, Amount: $totalAmount")
+                        } while (it.moveToNext())
+                    }
+                }
+            }
+
+            // Điền dữ liệu cho tất cả các tháng từ 1 đến tháng hiện tại
+            if (timeType == "year") {
+                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1 // Tháng 6
+                for (month in 1..currentMonth) {
+                    val amount = monthData[month] ?: 0f
+                    data.add(Pair("Tháng $month", amount))
+                }
+                // Thêm các tháng sau tháng hiện tại nếu có dữ liệu
+                for (month in (currentMonth + 1)..12) {
+                    if (monthData.containsKey(month)) {
+                        data.add(Pair("Tháng $month", monthData[month]!!))
+                    }
+                }
+            } else {
+                dbRead.use { db ->
+                    val cursor = db.rawQuery(query, selectionArgs)
+                    cursor.use {
+                        if (it.moveToFirst()) {
+                            do {
+                                val period = it.getString(it.getColumnIndexOrThrow("period"))
+                                val totalAmount = it.getFloat(it.getColumnIndexOrThrow("total_amount"))
+                                data.add(Pair(period, totalAmount))
+                                Log.d("SAInvoiceDetailRepo", "LineChart: $period, Amount: $totalAmount")
+                            } while (it.moveToNext())
+                        }
+                    }
                 }
             }
         }
