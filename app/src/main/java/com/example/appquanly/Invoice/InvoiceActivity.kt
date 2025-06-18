@@ -1,5 +1,7 @@
 package com.example.appquanly.Invoice
 
+import android.content.ContentValues
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Gravity
@@ -12,6 +14,9 @@ import com.example.appquanly.CalculatorDialogFragment
 import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
+import com.example.appquanly.data.sqlite.Local.DatabaseCopyHelper
+import com.example.appquanly.data.sqlite.Local.SAInvoiceRepository
+import com.example.appquanly.salee.SaleeActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -28,7 +33,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     private lateinit var btnXong: AppCompatButton
     private lateinit var icBack: ImageView
     private var invoiceDetails: List<SAInvoiceDetail> = listOf()
-
+    private var invoiceItem: SAInvoiceItem? = null
     private var totalAmount = 0.0
 
     companion object {
@@ -43,10 +48,10 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         bindViews()
         setupListeners()
 
+        initDataFromIntent()
+
         val invoiceNumber = generateNextInvoiceNumber()
         tvSoHoaDon.text = "Số hóa đơn: $invoiceNumber"
-
-        initDataFromIntent()
     }
 
     private fun bindViews() {
@@ -67,13 +72,44 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         }
 
         btnXong.setOnClickListener {
-            Toast.makeText(this, "Đã thu tiền thành công, vui lòng chọn món mới", Toast.LENGTH_SHORT).show()
-            finish()
+            val tienKhachDua = tvTienKhachDua.text.toString().replace(".", "").toDoubleOrNull() ?: 0.0
+            if (tienKhachDua >= totalAmount) {
+                invoiceItem?.let { item ->
+                    val updatedItem = item.copy(
+                        paymentStatus = 1,
+                        receiveAmount = tienKhachDua,
+                        remainAmount = tienKhachDua - totalAmount,
+                        modifiedDate = System.currentTimeMillis(),
+                        modifiedBy = item.modifiedBy ?: "User"
+                    )
+                    val repository = SAInvoiceRepository(this@InvoiceActivity)
+                    val db = DatabaseCopyHelper(this@InvoiceActivity).writableDatabase
+                    val values = ContentValues().apply {
+                        put("PaymentStatus", updatedItem.paymentStatus)
+                        put("ReceiveAmount", updatedItem.receiveAmount)
+                        put("RemainAmount", updatedItem.remainAmount)
+                        put("ModifiedDate", updatedItem.modifiedDate)
+                        put("ModifiedBy", updatedItem.modifiedBy)
+                    }
+                    db.update("SAInvoice", values, "RefID = ?", arrayOf(item.refId))
+                    db.close()
+
+                    val resultIntent = Intent()
+                    resultIntent.putExtra(SaleeActivity.EXTRA_INVOICE_REF_ID, item.refId)
+                    setResult(SaleeActivity.RESULT_PAYMENT_SUCCESS, resultIntent)
+                    Toast.makeText(this, "Đã thu tiền thành công, vui lòng chọn món mới", Toast.LENGTH_SHORT).show()
+                    finish()
+                } ?: run {
+                    Toast.makeText(this, "Lỗi: Không tìm thấy thông tin hóa đơn", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Số tiền khách đưa chưa đủ", Toast.LENGTH_SHORT).show()
+            }
         }
 
         tvTienKhachDua.setOnClickListener {
             val dialog = CalculatorDialogFragment(totalAmount.toLong()) { soTienKhachDua ->
-                tvTienKhachDua.setText(String.format("%,d", soTienKhachDua).replace(",", "."))
+                tvTienKhachDua.text = String.format("%,.0f", soTienKhachDua).replace(",", ".")
                 val tienThoi = soTienKhachDua - totalAmount
                 showRemainAmount(tienThoi)
             }
@@ -82,35 +118,30 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     }
 
     private fun initDataFromIntent() {
-
-        invoiceDetails = intent.getParcelableArrayListExtra("invoiceDetails")
+        // Lấy dữ liệu hóa đơn từ intent
+        invoiceItem = intent.getParcelableExtra<SAInvoiceItem>("invoiceItem")
+        invoiceDetails = intent.getParcelableArrayListExtra<SAInvoiceDetail>("invoiceDetails")
             ?: intent.getParcelableArrayListExtra("EXTRA_INVOICE_DETAILS")
                     ?: listOf()
 
-        val invoiceItem = intent.getParcelableExtra<SAInvoiceItem>("invoiceItem")
+        // Lấy số bàn và số khách từ invoiceItem
+        val soBan = invoiceItem?.tableName
+        val soKhach = invoiceItem?.numberOfPeople?.toString()
 
-        // Nhận dữ liệu từ cả nút "Cất" và "Thanh toán"
-        val invoiceDetails = intent.getParcelableArrayListExtra<SAInvoiceDetail>("invoiceDetails")
-            ?: intent.getParcelableArrayListExtra("EXTRA_INVOICE_DETAILS")
+        // Thiết lập số bàn
+        tvSoBan.text = soBan?.let { "Bàn $it" } ?: "Bàn không xác định"
 
-        val soBan = intent.getStringExtra("EXTRA_SO_BAN")
-        val soKhach = intent.getStringExtra("EXTRA_SO_KHACH")
-        val tongTienStr = intent.getStringExtra("EXTRA_TONG_TIEN")
-
-        tvSoBan.text = soBan?.let { " Bàn $it " }
-
-        // Hiển thị tổng tiền nếu có truyền vào
-        if (!tongTienStr.isNullOrEmpty()) {
-            tvTongTien.text = " $tongTienStr"
-        }
-
+        // Thiết lập ngày
         val formattedDate = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Calendar.getInstance().time)
         tvNgay.text = "Ngày: $formattedDate"
 
-        if (invoiceDetails != null && invoiceDetails.isNotEmpty()) {
+        // Hiển thị chi tiết hóa đơn và tính tổng tiền
+        if (invoiceDetails.isNotEmpty()) {
             displayInvoiceDetails(invoiceDetails)
+            showTotalAmount(totalAmount)
         } else {
             showToast("Không có dữ liệu hóa đơn")
+            tvTongTien.text = "0 đ"
         }
     }
 
@@ -118,7 +149,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         tableLayout.removeAllViews()
         totalAmount = 0.0
 
-        // Header row
+        // Hàng tiêu đề
         val headerRow = TableRow(this).apply {
             listOf("Tên Hàng", "SL", "Đơn giá", "Thành tiền").forEach {
                 addView(TextView(context).apply {
@@ -131,20 +162,20 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         }
         tableLayout.addView(headerRow)
 
-        // Dòng kẻ đen dưới header
+        // Dòng kẻ đen dưới tiêu đề
         addSolidDivider()
-
 
         // Hiển thị các dòng sản phẩm
         details.forEach { detail ->
             val amount = detail.Quantity * detail.UnitPrice
+            totalAmount += amount
 
             val row = TableRow(this).apply {
                 listOf(
                     detail.InventoryItemName,
                     detail.Quantity.toInt().toString(),
-                    String.format("%,.0f", detail.UnitPrice),
-                    String.format("%,.0f", amount)
+                    String.format("%,.0f", detail.UnitPrice).replace(",", "."),
+                    String.format("%,.0f", amount).replace(",", ".")
                 ).forEach {
                     addView(TextView(context).apply {
                         text = it
@@ -157,12 +188,10 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
 
             // Dòng kẻ nét đứt sau mỗi sản phẩm
             addDashedLine()
-
-            totalAmount += amount
         }
 
-        tvTienKhachDua.text = String.format("%,.0f", totalAmount)
-
+        // Cập nhật tvTienKhachDua với totalAmount
+        tvTienKhachDua.text = String.format("%,.0f", totalAmount).replace(",", ".")
     }
 
     private fun addSolidDivider() {
@@ -190,7 +219,6 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
         tableLayout.addView(line)
     }
 
-
     private fun generateNextInvoiceNumber(): String {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val currentNumber = prefs.getInt(KEY_INVOICE_NUMBER, 0) + 1
@@ -201,15 +229,15 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     override fun showInvoiceData(items: List<com.example.appquanly.data.sqlite.Entity.InventoryItem>) {}
 
     override fun showTotalAmount(amount: Double) {
-        tvTongTien.text = " ${String.format("%,.0f", amount)} đ"
+        tvTongTien.text = "${String.format("%,.0f", amount).replace(",", ".")} đ"
     }
 
     override fun showReceiveAmount(amount: Double) {
-        tvTienKhachDua.setText(String.format("%,.0f", amount))
+        tvTienKhachDua.text = String.format("%,.0f", amount).replace(",", ".")
     }
 
     override fun showRemainAmount(remain: Double) {
-        tvTienTraLai.text = " ${String.format("%,.0f", remain)} đ"
+        tvTienTraLai.text = "${String.format("%,.0f", remain).replace(",", ".")} đ"
     }
 
     override fun showInvoiceInfo(refNo: String, date: String) {

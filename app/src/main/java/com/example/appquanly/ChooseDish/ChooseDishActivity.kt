@@ -35,7 +35,8 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
 
     companion object {
         const val REQUEST_CODE_CALCULATOR = 1001
-        const val REQUEST_CODE_SALEE = 2001  // Thêm REQUEST_CODE_SALEE để dùng onActivityResult
+        const val REQUEST_CODE_SALEE = 2001
+        const val REQUEST_CODE_INVOICE = 3001 // Thêm để xử lý kết quả từ InvoiceActivity
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +76,6 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             override fun onQuantityClick(item: InventoryItem, position: Int) {
                 currentTargetTextView = recyclerView.findViewHolderForAdapterPosition(position)
                     ?.itemView?.findViewById(R.id.tvQuantity)
-
                 openCalculatorForQuantity(item, position)
             }
         })
@@ -107,48 +107,26 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
             finish()
         }
 
-
-
         edit_store.setOnClickListener {
             val selectedDetails = presenter.getSelectedInvoiceDetails()
             val soBan = btnSetting.text.toString()
             val soKhach = btnAvatar.text.toString()
             val tongTien = tvTotalMoney.text.toString()
 
-            // Tạo danh sách SAInvoiceItem từ SAInvoiceDetail
             val invoiceItems = presenter.convertToInvoiceItems(selectedDetails)
-
-            // Lưu vào database nếu cần
             presenter.saveInvoice(soBan, soKhach, tongTien, selectedDetails)
 
-            // Truyền cả invoiceItems và invoiceDetails sang SaleeActivity
             val intent = Intent(this, SaleeActivity::class.java)
             intent.putExtra("so_ban", soBan)
             intent.putExtra("so_khach", soKhach)
             intent.putExtra("tong_tien", tongTien)
             intent.putExtra("invoiceItems", ArrayList(invoiceItems))
             intent.putParcelableArrayListExtra("invoice_details", ArrayList(selectedDetails))
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE_SALEE)
         }
-
-        btnCollectMoney.setOnClickListener {
-            val selectedDetails: List<SAInvoiceDetail> = presenter.getSelectedInvoiceDetails()
-            val soBan = findViewById<TextView>(R.id.seting).text.toString()
-            val soKhach = findViewById<TextView>(R.id.avatar).text.toString()
-            val tongTien = tvTotalMoney.text.toString()
-
-            val intent = Intent(this, InvoiceActivity::class.java)
-            intent.putParcelableArrayListExtra("EXTRA_INVOICE_DETAILS", ArrayList(selectedDetails))
-            intent.putExtra("EXTRA_SO_BAN", soBan)
-            intent.putExtra("EXTRA_SO_KHACH", soKhach)
-            intent.putExtra("EXTRA_TONG_TIEN", tongTien)
-            startActivity(intent)
-        }
-
 
         presenter.loadItemsFromDB()
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -174,7 +152,6 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
     private fun openCalculatorForQuantity(item: InventoryItem, position: Int) {
         val calculatorDialog = CalculatorDialogFragment { result ->
             showMessage("Giá trị máy tính trả về: $result")
-
             val quantity = result.toIntOrNull()
             if (quantity != null && quantity >= 0) {
                 adapter.updateQuantityAt(position, quantity)
@@ -188,14 +165,18 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
     }
 
     override fun updateTotalMoney(total: Double) {
-        val formattedTotal = String.format(Locale("vi", "VN"), "%,.0f đ", total)
+        val formattedTotal = String.format(Locale("vi", "VN"), "%,.0f ", total)
         tvTotalMoney.text = formattedTotal
     }
 
-    override fun navigateToInvoice(selectedDetails: List<SAInvoiceDetail>) {
+    override fun navigateToInvoice(selectedDetails: List<SAInvoiceDetail>, invoiceItem: SAInvoiceItem) {
         val intent = Intent(this, InvoiceActivity::class.java)
         intent.putParcelableArrayListExtra("EXTRA_INVOICE_DETAILS", ArrayList(selectedDetails))
-        startActivity(intent)
+        intent.putExtra("invoiceItem", invoiceItem)
+        intent.putExtra("EXTRA_SO_BAN", btnSetting.text.toString())
+        intent.putExtra("EXTRA_SO_KHACH", btnAvatar.text.toString())
+        intent.putExtra("EXTRA_TONG_TIEN", tvTotalMoney.text.toString())
+        startActivityForResult(intent, REQUEST_CODE_INVOICE)
     }
 
     override fun getContext(): Context {
@@ -203,23 +184,30 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
     }
 
     override fun openInvoiceScreen(refId: String) {
-        // Tạm để trống hoặc bổ sung khi cần
+        // Không cần thiết hiện tại
     }
 
     override fun navigateToSaleeScreen(invoiceItems: List<SAInvoiceItem>) {
         val intent = Intent(this, SaleeActivity::class.java)
         val bundle = Bundle()
-        bundle.putSerializable("invoiceItems", ArrayList(invoiceItems)) // SAInvoiceItem phải implement Serializable
+        bundle.putSerializable("invoiceItems", ArrayList(invoiceItems))
         intent.putExtras(bundle)
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CODE_SALEE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_SALEE && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_CODE_INVOICE && resultCode == SaleeActivity.RESULT_PAYMENT_SUCCESS) {
+            // Làm mới danh sách món và tổng tiền
+            presenter.clearSelectedItems()
+            presenter.loadItemsFromDB()
+            showMessage("Thanh toán thành công!")
+            // Gửi broadcast để thông báo cho ReportActivity làm mới
+            val intent = Intent("com.example.appquanly.REFRESH_REPORT")
+            sendBroadcast(intent)
+        } else if (requestCode == REQUEST_CODE_SALEE && resultCode == RESULT_OK) {
             val selectedItems = data?.getParcelableArrayListExtra<SAInvoiceDetail>("selected_items")
             selectedItems?.let {
-                // Map sang InventoryItem và cập nhật adapter
                 val selectedInventoryItems = it.map { detail ->
                     InventoryItem(
                         InventoryItemID = detail.InventoryItemID ?: "",
@@ -236,16 +224,12 @@ class ChooseDishActivity : AppCompatActivity(), ChooseDishContract.View {
                         Color = null,
                         IconFileName = null,
                         UseCount = 0,
-                        quantity = detail.Quantity?.toInt() ?: 0,  // <-- Chuyển về Int rõ ràng
+                        quantity = detail.Quantity?.toInt() ?: 0,
                         isTicked = true
                     )
                 }
                 adapter.setSelectedItems(selectedInventoryItems)
-
-            }
-
             }
         }
     }
-
-
+}

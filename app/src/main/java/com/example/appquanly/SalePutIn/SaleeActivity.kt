@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.*
 import com.example.appquanly.ChooseDish.view.ChooseDishActivity
+import com.example.appquanly.Invoice.InvoiceActivity
 import com.example.appquanly.SalePutIn.BaseDrawerActivity
 import com.example.appquanly.SalePutIn.InvoiceWithDetails
 import com.example.appquanly.SalePutIn.SaleeAdapter
@@ -30,6 +31,9 @@ class SaleeActivity : BaseDrawerActivity(), SaleeContract.View {
 
     companion object {
         const val REQUEST_CODE_SALEE = 2001
+        const val REQUEST_CODE_INVOICE = 2002
+        const val EXTRA_INVOICE_REF_ID = "invoice_ref_id"
+        const val RESULT_PAYMENT_SUCCESS = 1001
     }
 
     override fun getLayoutId(): Int = R.layout.activity_sale
@@ -57,13 +61,42 @@ class SaleeActivity : BaseDrawerActivity(), SaleeContract.View {
                 showCancelDialog(itemWithDetails)
             },
             onPayClick = { itemWithDetails ->
-                showMessage("Thanh toán bàn ${itemWithDetails.invoice.tableName}")
+                val intent = Intent(this, InvoiceActivity::class.java)
+                intent.putExtra("invoiceItem", itemWithDetails.invoice)
+                intent.putParcelableArrayListExtra("invoiceDetails", ArrayList(itemWithDetails.details))
+                startActivityForResult(intent, REQUEST_CODE_INVOICE)
             }
         )
 
         recyclerView.adapter = adapter
 
         presenter.loadInvoiceItems()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_INVOICE && resultCode == RESULT_PAYMENT_SUCCESS) {
+            val refId = data?.getStringExtra(EXTRA_INVOICE_REF_ID)
+            if (refId != null) {
+                deleteInvoiceByRefId(refId)
+                presenter.loadInvoiceItems() // Làm mới danh sách từ cơ sở dữ liệu
+            }
+        } else if (requestCode == REQUEST_CODE_SALEE) {
+            presenter.loadInvoiceItems()
+        }
+    }
+
+    private fun deleteInvoiceByRefId(refId: String) {
+        val currentList = adapter.getData().toMutableList()
+        val itemToRemove = currentList.find { it.invoice.refId == refId }
+        if (itemToRemove != null) {
+            currentList.remove(itemToRemove)
+            adapter.updateData(currentList)
+            showMessage("Thanh toán thành công")
+            if (currentList.isEmpty()) {
+                showNoOrders()
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -88,9 +121,7 @@ class SaleeActivity : BaseDrawerActivity(), SaleeContract.View {
     }
 
     override fun openOrderScreen() {
-        // Mở màn hình chọn món bằng startActivityForResult
         val intent = Intent(this, ChooseDishActivity::class.java)
-        // Nếu cần thêm dữ liệu, bạn có thể putExtra vào intent ở đây
         startActivityForResult(intent, REQUEST_CODE_SALEE)
     }
 
@@ -147,7 +178,6 @@ class SaleeActivity : BaseDrawerActivity(), SaleeContract.View {
     private fun deleteInvoice(itemWithDetails: InvoiceWithDetails) {
         val success = repository.deleteInvoiceAndDetailsById(itemWithDetails.invoice.refId)
         if (success) {
-            // Cập nhật lại danh sách trong adapter
             val currentList = adapter.getData().toMutableList()
             val removed = currentList.remove(itemWithDetails)
             if (removed) {

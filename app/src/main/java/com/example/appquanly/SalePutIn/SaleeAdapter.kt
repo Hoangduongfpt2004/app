@@ -14,7 +14,6 @@ import com.example.appquanly.Invoice.InvoiceActivity
 import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 
-
 class SaleeAdapter(
     private val invoicesWithDetails: MutableList<InvoiceWithDetails>,
     private val onCancelClick: (InvoiceWithDetails) -> Unit,
@@ -88,23 +87,14 @@ class SaleeAdapter(
                 flCircleTableNumber.setBackgroundResource(R.drawable.circle_green)
             }
 
-            // Khi nhấn nút "Thu tiền"
             btnPay.setOnClickListener {
-                val context = itemView.context
-                val intent = Intent(context, InvoiceActivity::class.java)
-                intent.putExtra("invoiceItem", itemWithDetails.invoice)
-                intent.putParcelableArrayListExtra("invoiceDetails", ArrayList(itemWithDetails.details))
-                context.startActivity(intent)
-
                 onPayClick(itemWithDetails)
             }
 
-            // Khi nhấn nút "Hủy"
             btnCancel.setOnClickListener {
                 showCancelDialog(itemWithDetails)
             }
 
-            // Khi nhấn vào toàn bộ itemView → quay lại ThucDonActivity và truyền danh sách món đã chọn
             itemView.setOnClickListener {
                 val context = itemView.context
                 val intent = Intent(context, ChooseDishActivity::class.java)

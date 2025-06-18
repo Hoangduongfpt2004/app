@@ -12,9 +12,6 @@
         android:text="Nhập"
         style="@style/tvTitle_MayTinh"/>
 
-
-
-
     <!-- Display -->
     <EditText
         android:id="@+id/edtDisplay"

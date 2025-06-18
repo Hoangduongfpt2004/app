@@ -52,7 +52,7 @@ class ChooseDishAdapter(
         // Tên và giá
         holder.tvName.text = item.InventoryItemName ?: "Tên món trống"
         holder.tvPrice.text = item.Price?.let {
-            NumberFormat.getNumberInstance(Locale("vi", "VN")).format(it) + " đ"
+            NumberFormat.getNumberInstance(Locale("vi", "VN")).format(it) + ""
         } ?: "0 đ"
 
         // Icon món

@@ -13,9 +13,16 @@
         android:background="#2196F3"
         android:padding="8dp">
 
+
         <TextView
             android:text="Thêm đơn vị tính"
             style="@style/Sua_Don_Vi_Tinh"/>
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:text="Thêm đơn vị tính"
+            style="@style/Sua_Don_Vi_Tinh"/>
+
 
         <ImageView
             android:id="@+id/btnClose"

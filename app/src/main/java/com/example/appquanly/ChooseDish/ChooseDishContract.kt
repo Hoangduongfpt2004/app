@@ -10,14 +10,12 @@ interface ChooseDishContract {
     interface View {
         fun updateInventoryList(items: List<InventoryItem>)
         fun updateTotalMoney(total: Double)
-        fun navigateToInvoice(selectedDetails: List<SAInvoiceDetail>)
+        fun navigateToInvoice(selectedDetails: List<SAInvoiceDetail>, invoiceItem: SAInvoiceItem)
         fun showMessage(message: String)
         fun openCalculator()
         fun getContext(): Context
         fun openInvoiceScreen(refId: String)
         fun navigateToSaleeScreen(invoiceItems: List<SAInvoiceItem>)
-
-
     }
 
     interface Presenter {
@@ -33,12 +31,9 @@ interface ChooseDishContract {
         fun getSelectedInvoiceItems(): List<SAInvoiceItem>
         fun onSaveClick()
         fun getRefId(): String
-        fun goToInvoiceScreen(refId: String)
         fun getSelectedInvoiceDetails(): List<SAInvoiceDetail>
         fun submitInvoiceToSaleeActivity(tableName: String, numberOfPeople: Int)
         fun onInvoiceSavedSuccess()
         fun onInvoiceSavedFailed(error: String)
-
     }
- }
-
+}

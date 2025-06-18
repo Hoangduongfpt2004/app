@@ -6,7 +6,6 @@
     <style name="Image.Empty" >
         <item name="android:layout_width">215dp</item>
         <item name="android:layout_height">197dp</item>
-        <item name="android:src">@drawable/order_water_mark_1</item>
         <item name="android:contentDescription">@string/app_name</item>
         <item name="layout_constraintTop_toTopOf">parent</item>
         <item name="layout_constraintStart_toStartOf">parent</item>

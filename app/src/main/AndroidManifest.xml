@@ -18,9 +18,6 @@
             android:name=".Chart.ChartActivity"
             android:exported="false" />
         <activity
-            android:name=".Report.ChartDetailActivity"
-            android:exported="false" />
-        <activity
             android:name=".Invoice.InvoiceActivity"
             android:exported="false" />
         <activity
@@ -31,9 +28,6 @@
             android:exported="false" />
         <activity
             android:name=".CashRegister.CashRegisterActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Billing.BillingActivity"
             android:exported="false" />
         <activity
             android:name=".ChooseDish.view.ChooseDishActivity"
@@ -56,30 +50,7 @@
         <activity
             android:name=".AddDish.Add_DishActivity"
             android:exported="false" />
-        <activity
-            android:name=".LogOut.Log_OutActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CreatePassWord.Create_Pass_WordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ProductInformation.ProductlnformationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Comments.Gop_Y_Voi_Nha_Phat_TrienActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Review.ReviewActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserIntro.User_IntroActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Notification.NotificationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LinkAccount.Link_AccountActivity"
-            android:exported="false" />
+
         <activity
             android:name=".Report.ReportActivity"
             android:exported="false" />

@@ -1,7 +1,6 @@
 package com.example.appquanly.Chart
 
 import android.graphics.drawable.GradientDrawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,11 +8,10 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.appquanly.R
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
 
 class ProductDetailAdapter(
-    private var dataList: List<Pair<String, Float>> = emptyList(),
+    private var dataList: List<Triple<String, Int, Float>> = emptyList(),
     private val timeType: String,
     private var colors: List<Int> = emptyList(),
     private val onItemClick: (String, String) -> Unit
@@ -34,14 +32,20 @@ class ProductDetailAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val data = dataList.getOrNull(position)
-        val color = colors.getOrNull(position) ?: ContextCompat.getColor(holder.itemView.context, R.color.colorPrimary)
+        val color = colors.getOrNull(position) ?: ContextCompat.getColor(
+            holder.itemView.context,
+            R.color.colorPrimary
+        )
 
         val label = data?.first ?: "N/A"
+        val quantity = data?.second ?: 0
+        val amount = data?.third ?: 0f
 
         holder.tvIndex.text = (position + 1).toString()
         holder.tvPeriod.text = label
-        holder.tvAmount.text = if (data != null) String.format("%,.0fđ", data.second) else "0đ"
-        holder.tvQuantity.visibility = View.GONE
+        holder.tvAmount.text = String.format("%,.0f", amount)
+        holder.tvQuantity.text = "SL: $quantity"
+        holder.tvQuantity.visibility = View.VISIBLE
 
         val background = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
@@ -49,7 +53,12 @@ class ProductDetailAdapter(
             setSize(24, 24)
         }
         holder.tvIndex.background = background
-        holder.tvIndex.setTextColor(ContextCompat.getColor(holder.itemView.context, android.R.color.white))
+        holder.tvIndex.setTextColor(
+            ContextCompat.getColor(
+                holder.itemView.context,
+                android.R.color.white
+            )
+        )
 
         holder.itemView.setOnClickListener {
             onItemClick(label, timeType)
@@ -58,34 +67,33 @@ class ProductDetailAdapter(
 
     override fun getItemCount(): Int = dataList.size
 
-    fun updateData(newList: List<Pair<String, Float>>?, newColors: List<Int>?) {
-        val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1 // Tháng hiện tại (6)
+    fun updateData(newList: List<Triple<String, Int, Float>>?, newColors: List<Int>?) {
+        dataList = when (timeType) {
+            "week", "last_week" -> newList?.sortedBy {
+                val dayOrder = listOf("Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7")
+                dayOrder.indexOf(it.first)
+            }?.filter { it.third > 0 || timeType == "week" } ?: emptyList()
 
-        // Định dạng lại nhãn dựa trên timeType
-        val formattedList = newList?.map { (period, amount) ->
-            val formattedPeriod = when (timeType) {
-                "week", "last_week" -> {
-                    val day = period.split("-")[2].substring(0, 2)
-                    val dayMap = mapOf(
-                        "01" to "Thứ 2", "02" to "Thứ 2", "03" to "Thứ 3", "04" to "Thứ 4",
-                        "05" to "Thứ 5", "06" to "Thứ 6", "07" to "Thứ 7"
-                    )
-                    dayMap[day] ?: period
-                }
-                "month", "last_month" -> {
-                    val day = period.split("-")[2]
-                    "Ngày $day"
-                }
-                "year", "last_year" -> {
-                    val month = period.replace("Tháng ", "").toIntOrNull() ?: 1
-                    if (month <= currentMonth || amount > 0) period else null
-                }
-                else -> period
-            }
-            if (formattedPeriod != null) Pair(formattedPeriod, amount) else null
-        }?.filterNotNull() ?: emptyList()
+            "month", "last_month" -> newList?.sortedBy {
+                it.first.replace("Ngày ", "").toIntOrNull() ?: Int.MAX_VALUE
+            }?.filter {
+                it.third > 0 || (timeType == "month" && (it.first.replace("Ngày ", "").toIntOrNull()
+                    ?: 0) <= Calendar.getInstance().get(Calendar.DAY_OF_MONTH))
+            } ?: emptyList()
 
-        dataList = formattedList
+            "year" -> newList?.sortedBy {
+                it.first.replace("Tháng ", "").toIntOrNull() ?: Int.MAX_VALUE
+            }?.filter {
+                val month = it.first.replace("Tháng ", "").toIntOrNull() ?: 0
+                month <= Calendar.getInstance().get(Calendar.MONTH) + 1 || it.third > 0
+            } ?: emptyList()
+
+            "last_year" -> newList?.sortedBy {
+                it.first.replace("Tháng ", "").toIntOrNull() ?: Int.MAX_VALUE
+            }?.filter { it.third > 0 } ?: emptyList()
+
+            else -> newList?.sortedByDescending { it.third } ?: emptyList()
+        }
         colors = newColors ?: emptyList()
         notifyDataSetChanged()
     }

@@ -29,7 +29,7 @@
         <TextView
             android:id="@+id/tvSave"
             android:text="Cất"
-            android:textColor="@android:color/white"
+            android:textColor="#FFFFFF"
             style="@style/App_Base_Cat" />
     </RelativeLayout>
 

@@ -14,11 +14,23 @@
         android:layout_height="wrap_content"
         android:background="@color/blue"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="Doanh thu theo mặt hàng"
-        app:titleTextColor="@android:color/white" />
+        app:navigationIcon="@drawable/ic_arrow_back">
 
-    <!-- Nội dung chính (có dữ liệu) -->
+
+        <TextView
+            android:id="@+id/tvToolbarTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Doanh thu theo mặt hàng"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="16dp"/>
+    </com.google.android.material.appbar.MaterialToolbar>
+
+
+
     <LinearLayout
         android:id="@+id/mainContentLayout"
         android:layout_width="match_parent"
@@ -50,9 +62,6 @@
                 style="@style/App_txtTimeFilter" />
         </LinearLayout>
 
-
-
-
         <!-- Tiêu đề thống kê -->
         <TextView
             android:id="@+id/tvTitle"
@@ -80,7 +89,7 @@
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pieChart"
             android:layout_width="match_parent"
-            android:layout_height="280dp"
+            android:layout_height="200dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp" />
 
@@ -88,7 +97,7 @@
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/lineChart"
             android:layout_width="match_parent"
-            android:layout_height="280dp"
+            android:layout_height="200dp"
             android:layout_marginHorizontal="16dp"
             android:layout_marginBottom="16dp"
             android:visibility="gone" />

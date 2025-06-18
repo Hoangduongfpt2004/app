@@ -37,11 +37,8 @@ class ChooseDishPresenter(
         }
     }
 
-    override fun goToInvoiceScreen(refId: String) {
-        view.openInvoiceScreen(refId)
-    }
-
     override fun onBackClick() {}
+
     override fun onSettingClick() {
         view.openCalculator()
     }
@@ -97,8 +94,36 @@ class ChooseDishPresenter(
 
         scope.launch {
             val invoiceDetails = getSelectedInvoiceDetails()
-            invoiceDetailRepo.insertDetails(invoiceDetails)
-            view.showMessage("Đã lưu hóa đơn thành công!")
+            val currentTime = System.currentTimeMillis()
+            val invoiceItem = SAInvoiceItem(
+                refId = refID,
+                refType = 1,
+                refNo = "HD001",
+                refDate = currentTime,
+                amount = totalMoney,
+                returnAmount = 0.0,
+                receiveAmount = 0.0,
+                remainAmount = totalMoney,
+                journalMemo = "",
+                paymentStatus = 0, // Chưa thanh toán
+                numberOfPeople = 0,
+                tableName = "",
+                listItemName = selectedItems.joinToString(", ") { it.InventoryItemName ?: "" },
+                createdDate = currentTime,
+                createdBy = "",
+                modifiedDate = null,
+                modifiedBy = null
+            )
+
+            // Lưu hóa đơn và chi tiết hóa đơn vào cơ sở dữ liệu
+            val success = invoiceRepo.insertInvoice(invoiceItem)
+            if (success) {
+                invoiceDetailRepo.insertDetails(invoiceDetails)
+                view.showMessage("Hóa đơn tạm thời đã được lưu!")
+                view.navigateToInvoice(invoiceDetails, invoiceItem)
+            } else {
+                view.showMessage("Lỗi: Không thể lưu hóa đơn tạm thời!")
+            }
         }
     }
 
@@ -148,7 +173,7 @@ class ChooseDishPresenter(
                 InventoryItemID = item.InventoryItemID,
                 InventoryItemName = item.InventoryItemName ?: "",
                 UnitID = item.UnitID ?: "",
-                UnitName = "", // Lấy từ bảng đơn vị nếu cần
+                UnitName = "",
                 Quantity = quantity,
                 UnitPrice = price,
                 Amount = amount,
@@ -167,7 +192,6 @@ class ChooseDishPresenter(
 
         for (detail in details) {
             val key = detail.InventoryItemID
-
             val quantity = detail.Quantity.toInt()
             val amount = detail.Amount.toDouble()
 
@@ -178,7 +202,7 @@ class ChooseDishPresenter(
             } else {
                 groupedMap[key] = SAInvoiceItem(
                     refId = detail.RefID,
-                    refType = 0, // hoặc refType phù hợp nếu có
+                    refType = 0,
                     refNo = "",
                     refDate = System.currentTimeMillis(),
                     amount = amount,
@@ -202,7 +226,6 @@ class ChooseDishPresenter(
         return groupedMap.values.toList()
     }
 
-    //  Hàm đã được sửa lại đúng cách
     fun saveInvoice(soBan: String, soKhach: String, tongTien: String, details: List<SAInvoiceDetail>) {
         scope.launch {
             val currentTime = System.currentTimeMillis()
@@ -242,6 +265,14 @@ class ChooseDishPresenter(
                 onInvoiceSavedFailed("Không thể lưu hóa đơn.")
             }
         }
+    }
+
+    fun clearSelectedItems() {
+        itemList.forEach { it.quantity = 0; it.isTicked = false }
+        totalMoney = 0.0
+        refID = UUID.randomUUID().toString()
+        view.updateInventoryList(itemList)
+        view.updateTotalMoney(totalMoney)
     }
 
     override fun submitInvoiceToSaleeActivity(tableName: String, numberOfPeople: Int) {

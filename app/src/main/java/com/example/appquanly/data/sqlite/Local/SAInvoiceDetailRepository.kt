@@ -86,6 +86,8 @@ class SAInvoiceDetailRepository(private val context: Context) {
         }
     }
 
+
+
     fun getAllDetails(): List<SAInvoiceDetail> {
         val list = mutableListOf<SAInvoiceDetail>()
         dbRead.use { db ->
@@ -120,7 +122,7 @@ class SAInvoiceDetailRepository(private val context: Context) {
         dbWrite.use { db ->
             val detailWithUniqueID = detail.copy(
                 RefDetailID = UUID.randomUUID().toString(),
-                Amount = detail.Quantity * detail.UnitPrice // Đảm bảo Amount đúng
+                Amount = detail.Quantity * detail.UnitPrice
             )
             Log.d("InsertDetail", "Inserting RefDetailID = ${detailWithUniqueID.RefDetailID}, Amount = ${detailWithUniqueID.Amount}")
             return db.insert("SAInvoiceDetail", null, detailToContentValues(detailWithUniqueID))
@@ -151,8 +153,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
         }
     }
 
-
-
     fun updateDetail(detail: SAInvoiceDetail): Int {
         dbWrite.use { db ->
             return db.update(
@@ -168,7 +168,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
         val list = mutableListOf<SAInvoiceDetail>()
         dbRead.use { db ->
             val cursor = db.rawQuery(
-                "SELECT * FROM SAInvoiceDetail WHERE CreatedDate BETWEEN ? AND ?",
+                """
+                SELECT d.* FROM SAInvoiceDetail d
+                INNER JOIN SAInvoice i ON d.RefID = i.RefID
+                WHERE d.CreatedDate BETWEEN ? AND ? AND i.PaymentStatus = 1
+                """,
                 arrayOf(startTime.toString(), endTime.toString())
             )
             cursor.use {
@@ -187,10 +191,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
         dbRead.use { db ->
             val cursor = db.rawQuery(
                 """
-                SELECT InventoryItemName, SUM(Quantity) as total_quantity, SUM(Amount) as total_amount
-                FROM SAInvoiceDetail
-                WHERE CreatedDate BETWEEN ? AND ?
-                GROUP BY InventoryItemName
+                SELECT d.InventoryItemName, SUM(d.Quantity) as total_quantity, SUM(d.Amount) as total_amount
+                FROM SAInvoiceDetail d
+                INNER JOIN SAInvoice i ON d.RefID = i.RefID
+                WHERE d.CreatedDate BETWEEN ? AND ? AND i.PaymentStatus = 1
+                GROUP BY d.InventoryItemName
                 """,
                 arrayOf(startTime.toString(), endTime.toString())
             )
@@ -214,10 +219,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
         dbRead.use { db ->
             val cursor = db.rawQuery(
                 """
-                SELECT InventoryItemName, SUM(Amount) as total_amount
-                FROM SAInvoiceDetail
-                WHERE CreatedDate BETWEEN ? AND ?
-                GROUP BY InventoryItemName
+                SELECT d.InventoryItemName, SUM(d.Amount) as total_amount
+                FROM SAInvoiceDetail d
+                INNER JOIN SAInvoice i ON d.RefID = i.RefID
+                WHERE d.CreatedDate BETWEEN ? AND ? AND i.PaymentStatus = 1
+                GROUP BY d.InventoryItemName
                 """,
                 arrayOf(startTime.toString(), endTime.toString())
             )
@@ -240,7 +246,12 @@ class SAInvoiceDetailRepository(private val context: Context) {
         Log.d("SAInvoiceDetailRepo", "Query total amount between $startTime and $endTime")
         dbRead.use { db ->
             val cursor = db.rawQuery(
-                "SELECT SUM(Amount) as Total FROM SAInvoiceDetail WHERE CreatedDate BETWEEN ? AND ?",
+                """
+                SELECT SUM(d.Amount) as Total
+                FROM SAInvoiceDetail d
+                INNER JOIN SAInvoice i ON d.RefID = i.RefID
+                WHERE d.CreatedDate BETWEEN ? AND ? AND i.PaymentStatus = 1
+                """,
                 arrayOf(startTime.toString(), endTime.toString())
             )
             cursor.use {
@@ -252,6 +263,39 @@ class SAInvoiceDetailRepository(private val context: Context) {
         }
         Log.d("SAInvoiceDetailRepo", "Total amount: $total")
         return total
+    }
+
+    fun getTotalAmountForDateRange(fromDate: String, toDate: String): Double {
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val startTime: Long = try {
+            val date = dateFormat.parse(fromDate)
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            calendar.timeInMillis
+        } catch (e: Exception) {
+            Log.e("SAInvoiceDetailRepo", "Error parsing fromDate: $fromDate", e)
+            return 0.0
+        }
+
+        val endTime: Long = try {
+            val date = dateFormat.parse(toDate)
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            calendar.set(Calendar.HOUR_OF_DAY, 23)
+            calendar.set(Calendar.MINUTE, 59)
+            calendar.set(Calendar.SECOND, 59)
+            calendar.set(Calendar.MILLISECOND, 999)
+            calendar.timeInMillis
+        } catch (e: Exception) {
+            Log.e("SAInvoiceDetailRepo", "Error parsing toDate: $toDate", e)
+            return 0.0
+        }
+
+        return getTotalAmountBetween(startTime, endTime)
     }
 
     fun getLineChartData(timeType: String): List<Pair<String, Float>> {
@@ -279,10 +323,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     val endOfWeek = calendar.timeInMillis
 
                     query = """
-                    SELECT strftime('%Y-%m-%d', CreatedDate / 1000, 'unixepoch') as period, 
-                           SUM(Amount) as total_amount
-                    FROM SAInvoiceDetail
-                    WHERE CreatedDate BETWEEN ? AND ?
+                    SELECT strftime('%Y-%m-%d', d.CreatedDate / 1000, 'unixepoch') as period, 
+                           SUM(d.Amount) as total_amount
+                    FROM SAInvoiceDetail d
+                    INNER JOIN SAInvoice i ON d.RefID = i.RefID
+                    WHERE d.CreatedDate BETWEEN ? AND ? AND i.PaymentStatus = 1
                     GROUP BY period
                     ORDER BY period
                 """
@@ -301,10 +346,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     val endOfMonth = calendar.timeInMillis
 
                     query = """
-                    SELECT strftime('%Y-%m-%d', CreatedDate / 1000, 'unixepoch') as period, 
-                           SUM(Amount) as total_amount
-                    FROM SAInvoiceDetail
-                    WHERE CreatedDate BETWEEN ? AND ?
+                    SELECT strftime('%Y-%m-%d', d.CreatedDate / 1000, 'unixepoch') as period, 
+                           SUM(d.Amount) as total_amount
+                    FROM SAInvoiceDetail d
+                    INNER JOIN SAInvoice i ON d.RefID = i.RefID
+                    WHERE d.CreatedDate BETWEEN ? AND ? AND i.PaymentStatus = 1
                     GROUP BY period
                     ORDER BY period
                 """
@@ -323,10 +369,11 @@ class SAInvoiceDetailRepository(private val context: Context) {
                     val endOfYear = calendar.timeInMillis
 
                     query = """
-                    SELECT strftime('%Y-%m', CreatedDate / 1000, 'unixepoch') as period, 
-                           SUM(Amount) as total_amount
-                    FROM SAInvoiceDetail
-                    WHERE CreatedDate BETWEEN ? AND ?
+                    SELECT strftime('%Y-%m', d.CreatedDate / 1000, 'unixepoch') as period, 
+                           SUM(d.Amount) as total_amount
+                    FROM SAInvoiceDetail d
+                    INNER JOIN SAInvoice i ON d.RefID = i.RefID
+                    WHERE d.CreatedDate BETWEEN ? AND ? AND i.PaymentStatus = 1
                     GROUP BY period
                     ORDER BY period
                 """
@@ -350,14 +397,12 @@ class SAInvoiceDetailRepository(private val context: Context) {
                 }
             }
 
-            // Điền dữ liệu cho tất cả các tháng từ 1 đến tháng hiện tại
             if (timeType == "year") {
-                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1 // Tháng 6
+                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
                 for (month in 1..currentMonth) {
                     val amount = monthData[month] ?: 0f
                     data.add(Pair("Tháng $month", amount))
                 }
-                // Thêm các tháng sau tháng hiện tại nếu có dữ liệu
                 for (month in (currentMonth + 1)..12) {
                     if (monthData.containsKey(month)) {
                         data.add(Pair("Tháng $month", monthData[month]!!))
@@ -382,8 +427,6 @@ class SAInvoiceDetailRepository(private val context: Context) {
         return data
     }
 
-
-
     fun getTotalAmountToday(): Double {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -401,16 +444,12 @@ class SAInvoiceDetailRepository(private val context: Context) {
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
-
         calendar.add(Calendar.DAY_OF_MONTH, -1)
         val startOfYesterday = calendar.timeInMillis
-
         calendar.add(Calendar.DAY_OF_MONTH, 1)
         val endOfYesterday = calendar.timeInMillis - 1
-
         return getTotalAmountBetween(startOfYesterday, endOfYesterday)
     }
-
 
     fun getTotalAmountThisWeek(): Double {
         val calendar = Calendar.getInstance()
@@ -434,7 +473,8 @@ class SAInvoiceDetailRepository(private val context: Context) {
         calendar.set(Calendar.MILLISECOND, 0)
         val startOfMonth = calendar.timeInMillis
         calendar.add(Calendar.MONTH, 1)
-        val endOfMonth = calendar.timeInMillis - 1
+        calendar.add(Calendar.MILLISECOND, -1)
+        val endOfMonth = calendar.timeInMillis
         return getTotalAmountBetween(startOfMonth, endOfMonth)
     }
 
@@ -447,9 +487,8 @@ class SAInvoiceDetailRepository(private val context: Context) {
         calendar.set(Calendar.MILLISECOND, 0)
         val startOfYear = calendar.timeInMillis
         calendar.add(Calendar.YEAR, 1)
-        val endOfYear = calendar.timeInMillis - 1
+        calendar.add(Calendar.MILLISECOND, -1)
+        val endOfYear = calendar.timeInMillis
         return getTotalAmountBetween(startOfYear, endOfYear)
     }
-
-
 }

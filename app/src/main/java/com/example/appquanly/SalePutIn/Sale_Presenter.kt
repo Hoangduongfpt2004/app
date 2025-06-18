@@ -1,6 +1,7 @@
 package com.example.appquanly.salee
 
 import android.content.Context
+import android.util.Log
 import com.example.appquanly.R
 import com.example.appquanly.SalePutIn.InvoiceWithDetails
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
@@ -50,20 +51,15 @@ class SaleePresenter(
 
     override fun loadInvoiceItems() {
         scopeMain.launch {
-            val invoices = withContext(Dispatchers.IO) { invoiceRepo.getAllInvoices() }
-            if (invoices.isEmpty()) {
-                view.showNoOrders()
-                return@launch
-            }
-
             val invoicesWithDetails = withContext(Dispatchers.IO) {
-                invoices.map { invoice ->
-                    val details = invoiceDetailRepo.getDetailsByRefID(invoice.refId)
-                    InvoiceWithDetails(invoice, details)
-                }
+                invoiceRepo.getUnpaidInvoicesWithDetails()
             }
-
-            view.showInvoiceItems(invoicesWithDetails)
+            Log.d("SaleePresenter", "Loaded ${invoicesWithDetails.size} unpaid invoices")
+            if (invoicesWithDetails.isEmpty()) {
+                view.showNoOrders()
+            } else {
+                view.showInvoiceItems(invoicesWithDetails)
+            }
         }
     }
 
@@ -92,7 +88,7 @@ class SaleePresenter(
             val mainInvoice = SAInvoiceItem(
                 refId = refId,
                 refType = 1,
-                refNo = "HD001", // Có thể sinh số hóa đơn tùy ý
+                refNo = "HD001",
                 refDate = currentTime,
                 amount = amount,
                 returnAmount = 0.0,
@@ -115,7 +111,6 @@ class SaleePresenter(
                 invoiceDetails.forEach {
                     invoiceDetailRepo.insertDetail(it.copy(RefID = refId, CreatedDate = now))
                 }
-
             }
 
             view.showMessage("Lưu hóa đơn thành công!")
@@ -138,7 +133,7 @@ class SaleePresenter(
             val mainInvoice = SAInvoiceItem(
                 refId = refId,
                 refType = 1,
-                refNo = "HD001", // Có thể tùy biến số hóa đơn
+                refNo = "HD001",
                 refDate = currentTime,
                 amount = amount,
                 returnAmount = 0.0,

@@ -26,9 +26,34 @@ class SAInvoiceRepository(private val context: Context) {
         return list
     }
 
+    fun getUnpaidInvoices(): List<SAInvoiceItem> {
+        val list = mutableListOf<SAInvoiceItem>()
+        val db = DatabaseCopyHelper(context).readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM SAInvoice WHERE PaymentStatus = 0", null)
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(cursorToInvoice(cursor))
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        db.close()
+        Log.d("SAInvoiceRepo", "Unpaid invoices count: ${list.size}")
+        return list
+    }
+
     fun getAllInvoicesWithDetails(): List<InvoiceWithDetails> {
         val invoicesWithDetails = mutableListOf<InvoiceWithDetails>()
         val invoices = getAllInvoices()
+        for (invoice in invoices) {
+            val details = detailRepo.getDetailsByRefID(invoice.refId)
+            invoicesWithDetails.add(InvoiceWithDetails(invoice, details))
+        }
+        return invoicesWithDetails
+    }
+
+    fun getUnpaidInvoicesWithDetails(): List<InvoiceWithDetails> {
+        val invoicesWithDetails = mutableListOf<InvoiceWithDetails>()
+        val invoices = getUnpaidInvoices()
         for (invoice in invoices) {
             val details = detailRepo.getDetailsByRefID(invoice.refId)
             invoicesWithDetails.add(InvoiceWithDetails(invoice, details))
@@ -187,5 +212,4 @@ class SAInvoiceRepository(private val context: Context) {
             db.close()
         }
     }
-
 }

@@ -12,7 +12,6 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.net.ParseException
 import com.example.appquanly.R
 import com.example.appquanly.UnitOfMeasure.Unit_Of_MeasureActivity
 import com.example.appquanly.data.sqlite.Entity.InventoryItem

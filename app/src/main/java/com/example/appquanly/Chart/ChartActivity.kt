@@ -15,9 +15,9 @@ import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Local.SAInvoiceDetailRepository
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.ValueFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.appbar.MaterialToolbar
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -111,12 +111,12 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
         val btnClose = dialogView.findViewById<Button>(R.id.btn_close)
 
         val currentLabel = getTimeFilterLabel(timeType ?: "today")
-        itemNearby.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Gần đây") R.drawable.ic_check_filter else 0, 0)
-        itemYesterday.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Hôm qua") R.drawable.ic_check_filter else 0, 0)
-        itemThisWeek.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Tuần này") R.drawable.ic_check_filter else 0, 0)
-        itemThisMonth.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Tháng này") R.drawable.ic_check_filter else 0, 0)
-        itemThisYear.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Năm nay") R.drawable.ic_check_filter else 0, 0)
-        itemOther.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Khác") R.drawable.ic_check_filter else 0, 0)
+        itemNearby?.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Gần đây") R.drawable.ic_check_filter else 0, 0)
+        itemYesterday?.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Hôm qua") R.drawable.ic_check_filter else 0, 0)
+        itemThisWeek?.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Tuần này") R.drawable.ic_check_filter else 0, 0)
+        itemThisMonth?.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Tháng này") R.drawable.ic_check_filter else 0, 0)
+        itemThisYear?.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Năm nay") R.drawable.ic_check_filter else 0, 0)
+        itemOther?.setCompoundDrawablesWithIntrinsicBounds(0, 0, if (currentLabel == "Khác") R.drawable.ic_check_filter else 0, 0)
 
         val onItemClick = { newTimeType: String, label: String ->
             timeType = newTimeType
@@ -125,14 +125,14 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
             presenter.loadChartData(newTimeType)
         }
 
-        itemNearby.setOnClickListener { onItemClick("today", "Gần đây") }
-        itemYesterday.setOnClickListener { onItemClick("yesterday", "Hôm qua") }
-        itemThisWeek.setOnClickListener { onItemClick("week", "Tuần này") }
-        itemThisMonth.setOnClickListener { onItemClick("month", "Tháng này") }
-        itemThisYear.setOnClickListener { onItemClick("year", "Năm nay") }
-        itemOther.setOnClickListener { onItemClick("other", "Khác") }
+        itemNearby?.setOnClickListener { onItemClick("today", "Gần đây") }
+        itemYesterday?.setOnClickListener { onItemClick("yesterday", "Hôm qua") }
+        itemThisWeek?.setOnClickListener { onItemClick("week", "Tuần này") }
+        itemThisMonth?.setOnClickListener { onItemClick("month", "Tháng này") }
+        itemThisYear?.setOnClickListener { onItemClick("year", "Năm nay") }
+        itemOther?.setOnClickListener { onItemClick("other", "Khác") }
 
-        btnClose.setOnClickListener {
+        btnClose?.setOnClickListener {
             alertDialog.dismiss()
         }
 
@@ -169,28 +169,27 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
 
     private fun setupLineChart() {
         lineChart.apply {
-            description.isEnabled = false
-            setTouchEnabled(true)
-            setPinchZoom(true)
-            legend.isEnabled = true
-            axisRight.isEnabled = false
             setDrawGridBackground(false)
             setDrawBorders(false)
+            description.isEnabled = false
+            legend.isEnabled = true
 
             xAxis.apply {
-                granularity = 1f
+                position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
-                position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
             }
 
             axisLeft.apply {
-                axisMinimum = 0f
                 setDrawGridLines(true)
             }
+
+            axisRight.isEnabled = false
         }
     }
 
-    override fun showPieChartData(data: List<Pair<String, Float>>, colors: List<Int>) {
+
+    override fun showPieChartData(data: List<Triple<String, Int, Float>>, colors: List<Int>) {
         if (data.isEmpty()) {
             showNoRevenueLayout()
             return
@@ -201,8 +200,8 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
         pieChart.visibility = View.VISIBLE
         lineChart.visibility = View.GONE
 
-        val total = data.sumOf { it.second.toDouble() }
-        val entries = data.map { PieEntry(it.second, it.first) }
+        val total = data.sumOf { it.third.toDouble() }
+        val entries = data.map { PieEntry(it.third, "${it.first} (SL: ${it.second})") }
 
         val dataSet = PieDataSet(entries, "").apply {
             this.colors = colors
@@ -254,13 +253,16 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
         lineChart.visibility = View.VISIBLE
 
         val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
-        val filteredData = if (timeType == "year" || timeType == "last_year") {
-            data.filter { pair ->
-                val month = pair.first.replace("Tháng ", "").toIntOrNull() ?: 1
-                month <= currentMonth || pair.second > 0
+        val filteredData = when (timeType) {
+            "year" -> {
+                val months = (1..12).map { month ->
+                    val existing = data.find { it.first == "Tháng $month" }
+                    existing ?: Pair("Tháng $month", 0f)
+                }
+                months
             }
-        } else {
-            data
+            "last_year" -> data
+            else -> data
         }
 
         if (filteredData.isEmpty()) {
@@ -273,7 +275,7 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
         }
 
         val dataSet = LineDataSet(entries, "Doanh thu").apply {
-            color = ColorTemplate.MATERIAL_COLORS[0]
+            color = Color.parseColor("#FF5733")
             valueTextSize = 10f
             setDrawFilled(false)
             setDrawCircles(true)
@@ -291,47 +293,44 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
         lineChart.xAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 val index = value.toInt()
-
                 if (index !in filteredData.indices) return ""
-
-                val dateParts = filteredData[index].first.split("-")
-                if (dateParts.size < 3) return ""
-
+                val label = filteredData[index].first
                 return when (timeType) {
                     "week", "last_week" -> {
                         val dayMap = mapOf(
-                            "01" to "Thứ 2", "02" to "Thứ 2", "03" to "Thứ 3",
-                            "04" to "Thứ 4", "05" to "Thứ 5", "06" to "Thứ 6",
-                            "07" to "Thứ 7"
+                            0 to "Thứ 2", 1 to "Thứ 3", 2 to "Thứ 4",
+                            3 to "Thứ 5", 4 to "Thứ 6", 5 to "Thứ 7"
                         )
-                        val day = dateParts[2].padStart(2, '0').substring(0, 2)
-                        dayMap[day] ?: "?"
+                        dayMap[index] ?: label
                     }
-
                     "month", "last_month" -> {
-                        val day = dateParts[2].padStart(2, '0')
-                        "Ngày $day"
+                        "Ngày ${label.replace("Ngày ", "")}"
                     }
-
-                    "year", "last_year" -> filteredData[index].first
-
-                    else -> ""
+                    "year", "last_year" -> label
+                    else -> label
                 }
             }
         }
 
-
+        // Thiết lập tâm biểu đồ đường
+        lineChart.description.isEnabled = false
+        lineChart.legend.isEnabled = true
+        lineChart.setDrawGridBackground(false)
+        lineChart.xAxis.setDrawGridLines(false)
+        lineChart.axisLeft.setDrawGridLines(false)
+        lineChart.axisRight.isEnabled = false
+        lineChart.xAxis.position = com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM
         lineChart.invalidate()
     }
 
-    override fun showProductDetails(details: List<Pair<String, Float>>, colors: List<Int>) {
+    override fun showProductDetails(details: List<Triple<String, Int, Float>>, colors: List<Int>) {
         if (details.isEmpty()) {
             showNoRevenueLayout()
             return
         }
 
         hideNoRevenueLayout()
-        adapter.updateData(details, colors)
+        adapter.updateData(details, newColors = colors)
     }
 
     override fun showTitleAndDate(title: String, date: String) {
@@ -364,9 +363,7 @@ class ChartActivity : AppCompatActivity(), ChartContract.View {
         }
 
         hideNoRevenueLayout()
-        val formattedDetails = details.map { Pair("${it.first} (SL: ${it.second}, Giá: %,.0fđ".format(it.third), it.third) }
-        val colors = List(formattedDetails.size) { ColorTemplate.MATERIAL_COLORS[it % ColorTemplate.MATERIAL_COLORS.size] }
-        adapter.updateData(formattedDetails, colors)
+        adapter.updateData(details, newColors = List(details.size) { Color.parseColor("#FF5733") })
         tvTitle.text = "Chi tiết doanh thu - ${details.firstOrNull()?.first?.split(" ")?.firstOrNull() ?: "N/A"}"
         tvDate.text = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
     }

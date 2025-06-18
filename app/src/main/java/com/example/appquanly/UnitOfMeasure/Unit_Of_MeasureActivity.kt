@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -96,11 +97,17 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
     @RequiresApi(Build.VERSION_CODES.O)
     private fun showEditDialog(unit: UnitOfMeasure) {
         val dialogView = layoutInflater.inflate(R.layout.activiti_dialog_edit_unit, null)
+
         val editText = dialogView.findViewById<EditText>(R.id.edtUnitName)
         val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
         val btnCancel = dialogView.findViewById<Button>(R.id.btnCancel)
+        val textTitle = dialogView.findViewById<TextView>(R.id.txtTitle)
 
         editText.setText(unit.UnitName)
+
+
+        textTitle.text = "Sửa đơn vị tính"
+        btnSave.text = "LƯU"
 
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
 
@@ -119,6 +126,7 @@ class Unit_Of_MeasureActivity : AppCompatActivity(), Unit_Of_MeasureContract.Vie
         btnCancel.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
+
 
     override fun showList(units: List<UnitOfMeasure>) {
         // Đánh dấu đơn vị đang được chọn để hiển thị dấu tích
