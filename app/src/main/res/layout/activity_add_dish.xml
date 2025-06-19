@@ -62,10 +62,7 @@
                 android:layout_weight="1"
                 style="@style/Nhap_Ten_Mon" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_arrow_right" />
+
         </LinearLayout>
 
         <View

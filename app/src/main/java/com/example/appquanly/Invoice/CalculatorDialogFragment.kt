@@ -1,4 +1,4 @@
-package com.example.appquanly
+package com.example.appquanly.Invoice
 
 import android.app.Dialog
 import android.graphics.Color
@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import com.example.appquanly.R
 
 class CalculatorDialogFragment(
     private val billAmount: Long,
@@ -61,7 +62,9 @@ class CalculatorDialogFragment(
                     setBackgroundColor(Color.parseColor("#2196F3"))
                     setTextColor(Color.WHITE)
                 } else {
-                    background = ContextCompat.getDrawable(requireContext(), R.drawable.rounded_button_gray)
+                    background = ContextCompat.getDrawable(requireContext(),
+                        R.drawable.rounded_button_gray
+                    )
                 }
             }
             gridKeyboard.addView(btn)

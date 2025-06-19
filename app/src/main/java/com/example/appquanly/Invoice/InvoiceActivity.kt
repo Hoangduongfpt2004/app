@@ -10,7 +10,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
-import com.example.appquanly.CalculatorDialogFragment
 import com.example.appquanly.R
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceDetail
 import com.example.appquanly.data.sqlite.Entity.SAInvoiceItem
@@ -109,7 +108,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
 
         tvTienKhachDua.setOnClickListener {
             val dialog = CalculatorDialogFragment(totalAmount.toLong()) { soTienKhachDua ->
-                tvTienKhachDua.text = String.format("%,.0f", soTienKhachDua).replace(",", ".")
+                tvTienKhachDua.text = String.format("%,d", soTienKhachDua).replace(",", ".")
                 val tienThoi = soTienKhachDua - totalAmount
                 showRemainAmount(tienThoi)
             }
@@ -237,6 +236,7 @@ class InvoiceActivity : AppCompatActivity(), InvoiceContract.View {
     }
 
     override fun showRemainAmount(remain: Double) {
+        // Sử dụng %.0f cho Double, vì remain là Double
         tvTienTraLai.text = "${String.format("%,.0f", remain).replace(",", ".")} đ"
     }
 

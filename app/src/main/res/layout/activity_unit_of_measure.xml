@@ -40,7 +40,7 @@
         android:layout_margin="16dp"
         android:background="@drawable/bg_button_done"
         android:text="XONG"
-        android:textColor="@color/beige_base"
+        android:textColor="#FFFFFF"
         android:textStyle="bold" />
 
 </LinearLayout>
